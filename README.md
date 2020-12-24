@@ -13,7 +13,6 @@ ___
 ## Modules
 
 ### Convolution2D
-
 Applies 2D Convolution followed by Batch Normalization (optional) and Dropout (optional)
 
 refer docstring for complete imformation
@@ -41,4 +40,59 @@ another example:
         keras.layers.Dense(num_classes, activation="softmax")
     ])
 
+### DenselyConnected
+Densely Connected Layer followed by Batch Normalization (optional) and Dropout (optional)
 
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import modules
+
+    inputs = keras.Input(shape=(28, 28, 1))
+    x = keras.layers.GlobalAvgPool2D()(inputs)
+    x = modules.DenselyConnected(784, activation='relu')(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import modules
+
+    model = keras.models.Sequential([
+        keras.layers.GlobalAvgPool2D(input_shape=(28, 28, 1)),
+        modules.DenselyConnected(784, activation='relu'),
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+### VGGModule
+Implementation of VGG Modules with slight modifications,
+Applies multiple 2D Convolution followed by Batch Normalization (optional), Dropout (optional) and MaxPooling
+
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import modules
+
+    inputs = keras.Input(shape=(28, 28, 1))
+    x = modules.VGGModule(num_conv=3, num_filters=32, padding='same', activation='relu')(inputs)
+    x = keras.layers.GlobalAvgPool2D()(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import modules
+
+    model = keras.models.Sequential([
+        modules.VGGModule(num_conv=3, num_filters=32, padding='same', activation='relu', input_shape=(28, 28, 1)),
+        keras.layers.GlobalAvgPool2D(),
+        keras.layers.Dense(10, activation="softmax")
+    ])
