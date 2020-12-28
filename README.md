@@ -80,7 +80,7 @@ example usage:
     from pyradox import modules
 
     inputs = keras.Input(shape=(28, 28, 1))
-    x = modules.VGGModule(num_conv=3, num_filters=32, padding='same', activation='relu')(inputs)
+    x = modules.VGGModule(num_conv=3, num_filters=32, activation='relu')(inputs)
     x = keras.layers.GlobalAvgPool2D()(x)
     outputs = keras.layers.Dense(10, activation="softmax")(x)
 
@@ -92,7 +92,37 @@ another example:
     from pyradox import modules
 
     model = keras.models.Sequential([
-        modules.VGGModule(num_conv=3, num_filters=32, padding='same', activation='relu', input_shape=(28, 28, 1)),
+        modules.VGGModule(num_conv=3, num_filters=32, activation='relu', input_shape=(28, 28, 1)),
+        keras.layers.GlobalAvgPool2D(),
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+## Conv Nets
+
+### GeneralizedVGG
+A generalization of VGG networks
+
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import convnets
+
+    inputs = keras.Input(shape=(28, 28, 1))
+    x = convnets.GeneralizedVGG(conv_config=[(2, 32), (2, 64)], dense_config=[28])(inputs)
+    x = keras.layers.GlobalAvgPool2D()(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import convnets
+
+    model = keras.models.Sequential([
+        convnets.GeneralizedVGG(conv_config=[(2, 32), (2, 64)], dense_config=[28], input_shape=(28, 28, 1)),
         keras.layers.GlobalAvgPool2D(),
         keras.layers.Dense(10, activation="softmax")
     ])
