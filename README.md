@@ -126,3 +126,79 @@ another example:
         keras.layers.GlobalAvgPool2D(),
         keras.layers.Dense(10, activation="softmax")
     ])
+
+### VGG16
+A modified implementation of VGG16 network
+
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import convnets
+
+    inputs = keras.Input(shape=(32, 32, 3))
+    x = convnets.VGG16()(inputs)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import convnets
+
+    model = keras.models.Sequential([
+        convnets.VGG16(input_shape=(32, 32, 3)),
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+without dense:
+
+    import keras
+    from pyradox import convnets
+
+    inputs = keras.Input(shape=(32, 32, 3))
+    x = convnets.VGG16(use_dense=False)(inputs)
+    x = keras.layers.GlobalAvgPool2D()(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs)     
+
+### VGG19
+A modified implementation of VGG19 network
+
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import convnets
+
+    inputs = keras.Input(shape=(32, 32, 3))
+    x = convnets.VGG19()(inputs)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import convnets
+
+    model = keras.models.Sequential([
+        convnets.VGG19(input_shape=(32, 32, 3)),
+        keras.layers.Dense(10, activation="softmax")
+    ])    
+
+without dense:
+
+    import keras
+    from pyradox import convnets
+
+    inputs = keras.Input(shape=(32, 32, 3))
+    x = convnets.VGG19(use_dense=False)(inputs)
+    x = keras.layers.GlobalAvgPool2D()(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs)     
