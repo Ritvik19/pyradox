@@ -9,7 +9,7 @@ class Convolution2D(layers.Layer):
                 single integer specifies the same value for both dimensions, default: 3
         batch_normalization (bool): whether to use Batch Normalization, default: False
         dropout             (float): the dropout rate, default: 0
-        kwargs              (keyword arguments): the arguments for Convultion Layer
+        kwargs              (keyword arguments): the arguments for Convolution Layer
     """
     def __init__(self, num_filters=32, kernel_size=3, batch_normalization=False, dropout=0, **kwargs):
         super().__init__()
@@ -67,7 +67,7 @@ class VGGModule(layers.Layer):
         pool_size           (int/tuple of two ints): window size over which to take the maximum, default: 2
         pool_stride         (int/tuple of two ints): specifies how far the pooling window moves for each pooling step,
                 default: 2
-        kwargs              (keyword arguments): the arguments for Convultion Layer
+        kwargs              (keyword arguments): the arguments for Convolution Layer
     """
     def __init__(self, num_conv=2, num_filters=32, kernel_size=3, batch_normalization=False, dropout=0, pool_size=2, pool_stride=2, **kwargs):
         super().__init__()
@@ -83,6 +83,6 @@ class VGGModule(layers.Layer):
     def __call__(self, inputs):
         x = inputs
         for i in range(self.num_conv):
-            x = Convolution2D(self.num_filters, self.kernel_size, self.batch_normalization, self.dropout, **self.kwargs)(x)
+            x = Convolution2D(self.num_filters, self.kernel_size, self.batch_normalization, self.dropout, padding='same', **self.kwargs)(x)
         x = layers.MaxPooling2D(pool_size=self.pool_size, strides=self.pool_stride)(x)
         return x
