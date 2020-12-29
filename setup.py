@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyradox",
-    version="0.5.2",
+    version="0.5.3",
     author="Ritvik Rastogi",
     author_email="rastogiritvik99@gmail.com",
     description="A Deep Learning framework built on top of Keras containing implementations of Artificial Neural Network Architectures",

@@ -1,5 +1,5 @@
 from keras import layers
-from pyradox.modules import VGGModule, DenselyConnected
+from pyradox.modules import *
 
 class GeneralizedVGG(layers.Layer):
     """
