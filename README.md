@@ -51,7 +51,7 @@ example usage:
     from pyradox import modules
 
     inputs = keras.Input(shape=(28, 28, 1))
-    x = keras.layers.GlobalAvgPool2D()(inputs)
+    x = keras.layers.Flatten()(inputs)
     x = modules.DenselyConnected(784, activation='relu')(x)
     outputs = keras.layers.Dense(10, activation="softmax")(x)
 
@@ -63,7 +63,7 @@ another example:
     from pyradox import modules
 
     model = keras.models.Sequential([
-        keras.layers.GlobalAvgPool2D(input_shape=(28, 28, 1)),
+        keras.layers.Flatten(input_shape=(28, 28, 1)),
         modules.DenselyConnected(784, activation='relu'),
         keras.layers.Dense(10, activation="softmax")
     ])
@@ -202,3 +202,33 @@ without dense:
     outputs = keras.layers.Dense(10, activation="softmax")(x)
 
     model = keras.models.Model(inputs=inputs, outputs=outputs)     
+
+## Dense Nets
+
+### DenselyConnectedNetwork
+Network of Densely Connected Layers followed by Batch Normalization (optional) and Dropout (optional)
+
+refer docstring for complete imformation
+
+example usage:
+
+    import keras
+    from pyradox import densenets
+
+    inputs = keras.Input(shape=(28, 28, 1))
+    x = keras.layers.Flatten()(inputs)
+    x = densenets.DenselyConnectedNetwork([32, 28], batch_normalization=True, dropout=0.2)(x)
+    outputs = keras.layers.Dense(10, activation="softmax")(x)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs) 
+
+another example:
+
+    import keras
+    from pyradox import densenets
+
+    model = keras.models.Sequential([
+        keras.layers.Flatten(input_shape=(28, 28, 1)),
+        densenets.DenselyConnectedNetwork([32, 28], batch_normalization=True, dropout=0.2),
+        keras.layers.Dense(10, activation="softmax")
+    ])
