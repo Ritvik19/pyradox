@@ -52,7 +52,62 @@ class DenselyConnected(layers.Layer):
         if self.dropout != 0:
             x = layers.Dropout(self.dropout)(x)
         return x
+
+class DenseNetConvolutionBlock(layers.Layer):
+    """A Convolution block for DenseNets
+
+    Args:
+        growth_rate:          (float): growth rate at convolution layers
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1.001e-5
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        kwargs    (keyword arguments): the arguments for Convolution Layer
+    """
+    def __init__(self, growth_rate, epsilon=1.001e-5, activation='relu', use_bias=False, **kwargs):
+        super().__init__()
+        self.growth_rate = growth_rate
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+        self.kwargs = kwargs
     
+    def __call__(self, inputs):
+        x = inputs
+        x1 = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x1 = layers.Activation(self.activation)(x1)
+        x1 = layers.Conv2D(4*self.growth_rate, 1, use_bias=self.use_bias, **self.kwargs)(x1)
+        x1 = layers.BatchNormalization(epsilon=self.epsilon)(x1)
+        x1 = layers.Activation(self.activation)(x1)
+        x1 = layers.Conv2D(self.growth_rate, 3, padding='same', use_bias=self.use_bias, **self.kwargs)(x1)
+        x = layers.Concatenate(axis=3)([x, x1])
+        return x
+
+class DenseNetTransitionBlock(layers.Layer):
+    """A transition block for DenseNets
+
+    Args:
+        reduction:            (float): compression rate at transition layers
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1.001e-5
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        kwargs    (keyword arguments): the arguments for Convolution Layer
+    """
+    def __init__(self, reduction, epsilon=1.001e-5, activation='relu', **kwargs):
+        super().__init__()
+        self.reduction = reduction
+        self.epsilon = epsilon
+        self.activation = activation
+        self.kwargs = kwargs
+    
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.Conv2D(int(x.shape[-1]*self.reduction), 1, **self.kwargs)(x)
+        x = layers.AveragePooling2D(2, strides=2)(x)
+        return x
+
 class VGGModule(layers.Layer):
     """Implementation of VGG Modules with slight modifications,
     Applies multiple 2D Convolution followed by Batch Normalization (optional), Dropout (optional) and MaxPooling
