@@ -327,3 +327,52 @@ class InceptionBlock(layers.Layer):
             blocks.append(self.pooling_layer(inputs))
         x = layers.concatenate(blocks)
         return x
+
+
+class XceptionBlock(layers.Layer):
+    """A customised implementation of Xception Block (Depthwise Separable Convolutions)
+
+    Args:
+        channel_coefficient     (int): number of channels in the block
+        use_bias               (bool): whether the convolution layers use a bias vector, default: False
+        activation (keras Activation): activation to be applied, default: relu
+    """
+
+    def __init__(self, channel_coefficient, use_bias=False, activation="relu"):
+        super().__init__()
+        self.channel_coefficient = channel_coefficient
+        self.use_bias = use_bias
+        self.activation = activation
+
+    def __call__(self, inputs):
+        x = inputs
+        residual = inputs
+
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.add([x, residual])
+
+        return x

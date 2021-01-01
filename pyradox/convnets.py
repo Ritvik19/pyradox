@@ -12,7 +12,7 @@ class GeneralizedDenseNets(layers.Layer):
         epsilon:              (float): Small float added to variance to avoid dividing by zero in
                     batch normalisation, default: 1.001e-5
         activation (keras Activation): activation applied after batch normalization, default: relu
-        use_bias               (bool): whether the convolution (block) layers use a bias vector, defalut: False
+        use_bias               (bool): whether the convolution (block) layers use a bias vector, default: False
 
     """
 
@@ -60,7 +60,7 @@ class DenselyConnectedConvolutionalNetwork121(GeneralizedDenseNets):
         epsilon:              (float): Small float added to variance to avoid dividing by zero in
                     batch normalisation, default: 1.001e-5
         activation (keras Activation): activation applied after batch normalization, default: relu
-        use_bias               (bool): whether the convolution (block) layers use a bias vector, defalut: False
+        use_bias               (bool): whether the convolution (block) layers use a bias vector, default: False
     """
 
     def __init__(
@@ -84,7 +84,7 @@ class DenselyConnectedConvolutionalNetwork169(GeneralizedDenseNets):
         epsilon:              (float): Small float added to variance to avoid dividing by zero in
                     batch normalisation, default: 1.001e-5
         activation (keras Activation): activation applied after batch normalization, default: relu
-        use_bias               (bool): whether the convolution (block) layers use a bias vector, defalut: False
+        use_bias               (bool): whether the convolution (block) layers use a bias vector, default: False
     """
 
     def __init__(
@@ -108,7 +108,7 @@ class DenselyConnectedConvolutionalNetwork201(GeneralizedDenseNets):
         epsilon:              (float): Small float added to variance to avoid dividing by zero in
                     batch normalisation, default: 1.001e-5
         activation (keras Activation): activation applied after batch normalization, default: relu
-        use_bias               (bool): whether the convolution (block) layers use a bias vector, defalut: False
+        use_bias               (bool): whether the convolution (block) layers use a bias vector, default: False
     """
 
     def __init__(
@@ -283,7 +283,7 @@ class InceptionV3(layers.Layer):
     """Customized Implementation of Inception Net
 
     Args:
-        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        use_bias               (bool): whether the convolution layers use a bias vector, default: False
         activation   (keras Activation): activation to be applied, default: relu
         dropout                 (float): the dropout rate, default: 0
         kwargs      (keyword arguments): the arguments for Convolution Layer
@@ -1051,3 +1051,173 @@ class InceptionV3(layers.Layer):
             x = layers.concatenate([branch1x1, branch3x3, branch3x3dbl, branch_pool])
 
         return x
+
+
+class GeneralizedXception(layers.Layer):
+    """Generalized Implementation of Xception Net(Depthwise Separable Convolutions)
+
+    Args:
+        channel_coefficient     (int): factor controlling the number of channels in the network
+        depth_coefficient       (int): factor controlling the depth of the network
+        use_bias               (bool): whether the convolution layers use a bias vector, default: False
+        activation (keras Activation): activation to be applied, default: relu
+    """
+
+    def __init__(
+        self, channel_coefficient, depth_coefficient, use_bias=False, activation="relu"
+    ):
+        super().__init__()
+        self.channel_coefficient = channel_coefficient
+        self.depth_coefficient = depth_coefficient
+        self.use_bias = use_bias
+        self.activation = activation
+
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.Conv2D(32, (3, 3), strides=(2, 2), use_bias=self.use_bias)(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.Conv2D(
+            64,
+            (3, 3),
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+
+        residual = layers.Conv2D(
+            self.channel_coefficient,
+            (1, 1),
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        residual = layers.BatchNormalization()(residual)
+
+        x = layers.SeparableConv2D(
+            self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding="same")(x)
+        x = layers.add([x, residual])
+
+        residual = layers.Conv2D(
+            2 * self.channel_coefficient,
+            (1, 1),
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        residual = layers.BatchNormalization()(residual)
+
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            2 * self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            2 * self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding="same")(x)
+        x = layers.add([x, residual])
+
+        residual = layers.Conv2D(
+            6 * self.channel_coefficient,
+            (1, 1),
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        residual = layers.BatchNormalization()(residual)
+
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            6 * self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            6 * self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding="same")(x)
+        x = layers.add([x, residual])
+
+        for _ in range(self.depth_coefficient):
+            x = XceptionBlock(
+                6 * self.channel_coefficient,
+                use_bias=self.use_bias,
+                activation=self.activation,
+            )(x)
+
+        residual = layers.Conv2D(
+            8 * self.channel_coefficient,
+            (1, 1),
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        residual = layers.BatchNormalization()(residual)
+
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            6 * self.channel_coefficient, (3, 3), padding="same", use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            8 * self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+            name="block13_sepconv2",
+        )(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding="same")(x)
+        x = layers.add([x, residual])
+
+        x = layers.SeparableConv2D(
+            12 * self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.SeparableConv2D(
+            16 * self.channel_coefficient,
+            (3, 3),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        return x
+
+
+class XceptionNet(GeneralizedXception):
+    """A Customised Implementation of XceptionNet
+
+    Args:
+        GeneralizedXception ([type]): [description]
+    """
+
+    def __init__(self, use_bias=False, activation="relu"):
+        super().__init__(
+            channel_coefficient=128,
+            depth_coefficient=8,
+            use_bias=use_bias,
+            activation=activation,
+        )
