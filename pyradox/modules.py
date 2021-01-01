@@ -1,4 +1,5 @@
 from keras import layers
+from tensorflow.keras.activations import swish
 
 
 class Convolution2D(layers.Layer):
@@ -374,5 +375,121 @@ class XceptionBlock(layers.Layer):
         x = layers.BatchNormalization()(x)
 
         x = layers.add([x, residual])
+
+        return x
+
+
+class EfficientNetBlock(layers.Layer):
+    """Implementation of Efficient Net Block
+
+    Args:
+        activation (keras Activation): activation to be applied, default: swish
+        use_bias               (bool): whether the convolution layers use a bias vector, default: False
+        dropout               (float): the dropout rate, default: 0
+        filters_in              (int): the number of input filters, default: 32
+        filters_out             (int): the number of output filters, default: 16
+        kernel_size             (int): the dimension of the convolution window, default: 3
+        strides                 (int): the stride of the convolution, default: 1
+        expand_ratio            (int): scaling coefficient for the input filters, default: 1
+        se_ratio              (float): fraction to squeeze the input filters, default: 0
+        id_skip                (bool): True
+    """
+
+    def __init__(
+        self,
+        activation=swish,
+        use_bias=False,
+        dropout=0,
+        filters_in=32,
+        filters_out=16,
+        kernel_size=3,
+        strides=1,
+        expand_ratio=1,
+        se_ratio=1,
+        id_skip=True,
+    ):
+        super().__init__()
+        self.activation = activation
+        self.use_bias = use_bias
+        self.dropout = dropout
+        self.filters_in = filters_in
+        self.filters_out = filters_out
+        self.kernel_size = kernel_size
+        self.strides = strides
+        self.expand_ratio = expand_ratio
+        self.se_ratio = se_ratio
+        self.id_skip = id_skip
+
+    def correct_pad(self, inputs, kernel_size):
+        """Returns a tuple for zero-padding for 2D convolution with downsampling.
+        Args:
+            inputs: Input tensor.
+            kernel_size: An integer or tuple/list of 2 integers.
+        Returns:
+            A tuple.
+        """
+        input_size = inputs.shape[1:3]
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+        if input_size[0] is None:
+            adjust = (1, 1)
+        else:
+            adjust = (1 - input_size[0] % 2, 1 - input_size[1] % 2)
+        correct = (kernel_size[0] // 2, kernel_size[1] // 2)
+        return (
+            (correct[0] - adjust[0], correct[0]),
+            (correct[1] - adjust[1], correct[1]),
+        )
+
+    def __call__(self, inputs):
+        # Expansion phase
+        filters = self.filters_in * self.expand_ratio
+        if self.expand_ratio != 1:
+            x = layers.Conv2D(filters, 1, padding="same", use_bias=self.use_bias)(
+                inputs
+            )
+            x = layers.BatchNormalization()(x)
+            x = layers.Activation(self.activation)(x)
+        else:
+            x = inputs
+
+        # Depthwise Convolution
+        if self.strides == 2:
+            x = layers.ZeroPadding2D(
+                padding=self.correct_pad(x, self.kernel_size),
+            )(x)
+            conv_pad = "valid"
+        else:
+            conv_pad = "same"
+        x = layers.DepthwiseConv2D(
+            self.kernel_size,
+            strides=self.strides,
+            padding=conv_pad,
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+
+        # Squeeze and Excitation phase
+        if 0 < self.se_ratio <= 1:
+            filters_se = max(1, int(self.filters_in * self.se_ratio))
+            se = layers.GlobalAveragePooling2D()(x)
+            se_shape = (1, 1, filters)
+            se = layers.Reshape(se_shape)(se)
+            se = layers.Conv2D(
+                filters_se, 1, padding="same", activation=self.activation
+            )(se)
+            se = layers.Conv2D(filters, 1, padding="same", activation="sigmoid")(se)
+            x = layers.multiply([x, se])
+
+        # Output phase
+        x = layers.Conv2D(self.filters_out, 1, padding="same", use_bias=self.use_bias)(
+            x
+        )
+        x = layers.BatchNormalization()(x)
+        if self.id_skip and self.strides == 1 and self.filters_in == self.filters_out:
+            if self.dropout > 0:
+                x = layers.Dropout(self.dropout, noise_shape=(None, 1, 1, 1))(x)
+            x = layers.add([x, inputs])
 
         return x
