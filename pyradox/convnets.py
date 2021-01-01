@@ -1506,8 +1506,8 @@ class EfficientNetB6(EfficientNet):
         super().__init__(1.8, 2.6, 528, activation=activation, use_bias=use_bias)
 
 
-class EfficientNetB8(EfficientNet):
-    """Customized Implementation of Efficient Net B8
+class EfficientNetB7(EfficientNet):
+    """Customized Implementation of Efficient Net B7
 
     Args:
         activation (keras Activation): activation to be applied, default: swish
