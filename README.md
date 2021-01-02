@@ -21,6 +21,9 @@ ___
    8. [InceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionBlock.ipynb) Implementation on Inception Mixing Block
    9. [XceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/XceptionBlock.ipynb) A customised implementation of Xception Block (Depthwise Separable Convolutions)
    10. [EfficientNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetBlock.ipynb) Implementation of Efficient Net Block (Depthwise Separable Convolutions)
+   11. [ResNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetBlock.ipynb) Customized Implementation of ResNet Block
+   12. [ResNetV2Block](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetV2Block.ipynb) Customized Implementation of ResNetV2 Block
+   13. [ResNeXtBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXtBlock.ipynb) Customized Implementation of ResNeXt Block
 2. ConvNets
    1.  [GeneralizedDenseNets](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/GeneralizedDenseNets.ipynb) A generalization of Densely Connected Convolutional Networks (Dense Nets)
    2.  [DenselyConnectedConvolutionalNetwork121](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedConvolutionalNetwork121.ipynb) A modified implementation of Densely Connected Convolutional Network 121
@@ -41,7 +44,18 @@ ___
    17. [EfficientNetB5](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetB5.ipynb) Customized Implementation of Efficient Net B5
    18. [EfficientNetB6](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetB6.ipynb) Customized Implementation of Efficient Net B6
    19. [EfficientNetB7](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetB7.ipynb) Customized Implementation of Efficient Net B7
-   
+   20. [ResNet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet.ipynb) Customized Implementation of ResNet
+   21. [ResNet50](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet50.ipynb) Customized Implementation of ResNet50
+   22. [ResNet101](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet101.ipynb) Customized Implementation of ResNet101
+   23. [ResNet152](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet152.ipynb) Customized Implementation of ResNet152
+   24. [ResNetV2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetV2.ipynb) Customized Implementation of ResNetV2
+   25. [ResNet50V2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet50V2.ipynb) Customized Implementation of ResNet50V2
+   26. [ResNet101V2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet101V2.ipynb) Customized Implementation of ResNet101V2
+   27. [ResNet152V2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNet152V2.ipynb) Customized Implementation of ResNet152V2
+   28. [ResNeXt](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt.ipynb) Customized Implementation of ResNeXt
+   29. [ResNeXt50](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt50.ipynb) Customized Implementation of ResNeXt50
+   30. [ResNeXt101](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt101.ipynb) Customized Implementation of ResNeXt101
+   31. [ResNeXt152](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt152.ipynb) Customized Implementation of ResNeXt152
 3. DenseNets
    1. [DenselyConnectedNetwork](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedNetwork.ipynb) Network of Densely Connected Layers followed by Batch Normalization (optional) and Dropout (optional)
    2. [DenselyConnectedResnet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedResnet) Network of skip connections for densely connected layer

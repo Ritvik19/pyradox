@@ -493,3 +493,224 @@ class EfficientNetBlock(layers.Layer):
             x = layers.add([x, inputs])
 
         return x
+
+
+class ResNetBlock(layers.Layer):
+    """Customized Implementation of ResNet Block
+
+    Args:
+        filters                 (int): filters of the bottleneck layer
+        kernel_size             (int): kernel size of the bottleneck layer, default: 3
+        stride                  (int): stride of the first layer, default: 1
+        conv_shortcut          (bool): use convolution shortcut if True,
+                    otherwise identity shortcut, default: True
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1.001e-5
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        kwargs    (keyword arguments): the arguments for Convolution Layer
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size=3,
+        stride=1,
+        conv_shortcut=True,
+        epsilon=1.001e-5,
+        activation="relu",
+        use_bias=False,
+        **kwargs
+    ):
+        super().__init__()
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.conv_shortcut = conv_shortcut
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+        self.kwargs = kwargs
+
+    def __call__(self, inputs):
+        x = inputs
+
+        if self.conv_shortcut:
+            shortcut = layers.Conv2D(
+                4 * self.filters, 1, strides=self.stride, **self.kwargs
+            )(x)
+            shortcut = layers.BatchNormalization(epsilon=self.epsilon)(shortcut)
+        else:
+            shortcut = x
+
+        x = layers.Conv2D(self.filters, 1, strides=self.stride, **self.kwargs)(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.Conv2D(
+            self.filters, self.kernel_size, padding="SAME", **self.kwargs
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.Conv2D(4 * self.filters, 1, **self.kwargs)(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+
+        x = layers.Add()([shortcut, x])
+        x = layers.Activation(self.activation)(x)
+        return x
+
+
+class ResNetV2Block(layers.Layer):
+    """Customized Implementation of ResNetV2 Block
+
+    Args:
+        filters                 (int): filters of the bottleneck layer
+        kernel_size             (int): kernel size of the bottleneck layer, default: 3
+        stride                  (int): stride of the first layer, default: 1
+        conv_shortcut          (bool): use convolution shortcut if True,
+                    otherwise identity shortcut, default: True
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1.001e-5
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        kwargs    (keyword arguments): the arguments for Convolution Layer
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size=3,
+        stride=1,
+        conv_shortcut=True,
+        epsilon=1.001e-5,
+        activation="relu",
+        use_bias=False,
+        **kwargs
+    ):
+        super().__init__()
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.conv_shortcut = conv_shortcut
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+        self.kwargs = kwargs
+
+    def __call__(self, inputs):
+        x = inputs
+
+        preact = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        preact = layers.Activation(self.activation)(preact)
+
+        if self.conv_shortcut:
+            shortcut = layers.Conv2D(
+                4 * self.filters, 1, strides=self.stride, **self.kwargs
+            )(preact)
+        else:
+            shortcut = (
+                layers.MaxPooling2D(1, strides=self.stride)(x) if self.stride > 1 else x
+            )
+
+        x = layers.Conv2D(
+            self.filters, 1, strides=1, use_bias=self.use_bias, **self.kwargs
+        )(preact)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)))(x)
+        x = layers.Conv2D(
+            self.filters, self.kernel_size, strides=self.stride, use_bias=self.use_bias
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.Conv2D(4 * self.filters, 1, **self.kwargs)(x)
+        x = layers.Add()([shortcut, x])
+        return x
+
+
+class ResNeXtBlock(layers.Layer):
+    """Customized Implementation of ResNeXt Block
+
+    Args:
+        filters                 (int): filters of the bottleneck layer
+        kernel_size             (int): kernel size of the bottleneck layer, default: 3
+        stride                  (int): stride of the first layer, default: 1
+        groups                  (int): group size of grouped convolution, default:32
+        conv_shortcut          (bool): use convolution shortcut if True,
+                    otherwise identity shortcut, default: True
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1.001e-5
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        kwargs    (keyword arguments): the arguments for Convolution Layer
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size=3,
+        stride=1,
+        groups=32,
+        conv_shortcut=True,
+        epsilon=1.001e-5,
+        activation="relu",
+        use_bias=False,
+        **kwargs
+    ):
+        super().__init__()
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.groups = groups
+        self.conv_shortcut = conv_shortcut
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+        self.kwargs = kwargs
+
+    def __call__(self, inputs):
+        x = inputs
+
+        if self.conv_shortcut:
+            shortcut = layers.Conv2D(
+                (64 // self.groups) * self.filters,
+                1,
+                strides=self.stride,
+                use_bias=self.use_bias,
+                **self.kwargs
+            )(x)
+            shortcut = layers.BatchNormalization(epsilon=self.epsilon)(shortcut)
+        else:
+            shortcut = x
+
+        x = layers.Conv2D(self.filters, 1, use_bias=self.use_bias, **self.kwargs)(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        c = self.filters // self.groups
+        x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)))(x)
+        x = layers.DepthwiseConv2D(
+            self.kernel_size,
+            strides=self.stride,
+            depth_multiplier=c,
+            use_bias=self.use_bias,
+            **self.kwargs
+        )(x)
+        x_shape = x.shape[1:-1]
+        x = layers.Reshape(x_shape + (self.groups, c, c))(x)
+        x = layers.Lambda(lambda x: sum(x[:, :, :, :, i] for i in range(c)))(x)
+        x = layers.Reshape(x_shape + (self.filters,))(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.Conv2D(
+            (64 // self.groups) * self.filters, 1, use_bias=self.use_bias, **self.kwargs
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon)(x)
+
+        x = layers.Add()([shortcut, x])
+        x = layers.Activation(self.activation)(x)
+        return x
