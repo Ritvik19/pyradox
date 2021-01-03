@@ -785,3 +785,155 @@ class Rescale(layers.Layer):
 
     def __call__(self, inputs):
         return (inputs - self.mu) / self.sigma
+
+
+class InceptionResNetConv2D(layers.Layer):
+    """Implementation of Convolution Layer for Inception Res Net: Convolution2d followed by Batch Norm
+
+    Args:
+        filters                       (int): the number of output filters in the convolution
+        kernel_size (int/tuple of two ints): the height and width of the 2D convolution window,
+                single integer specifies the same value for both dimensions
+        strides         (tuple of two ints): specifying the strides of the convolution along the height and width,
+                default: 1
+        padding         ("valid" or "same"): "valid" means no padding. "same" results in padding evenly to the left/right
+                    or up/down of the input such that output has the same height/width dimension as the input, default: same
+        activation       (keras Activation): activation to be applied, default: relu
+        use_bias                     (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=1,
+        padding="same",
+        activation="relu",
+        use_bias=False,
+    ):
+        super().__init__()
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.strides = strides
+        self.padding = padding
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.Conv2D(
+            self.filters,
+            self.kernel_size,
+            strides=self.strides,
+            padding=self.padding,
+            use_bias=self.use_bias,
+        )(x)
+        if not self.use_bias:
+            x = layers.BatchNormalization(scale=False)(x)
+        if self.activation is not None:
+            x = layers.Activation(self.activation)(x)
+        return x
+
+
+class InceptionResNetBlock(layers.Layer):
+    """Implementation of Inception-ResNet block,
+    This class builds 3 types of Inception-ResNet blocks mentioned
+    in the paper, controlled by the `block_type` argument:
+    - Inception-ResNet-A: `block_type='block35'`
+    - Inception-ResNet-B: `block_type='block17'`
+    - Inception-ResNet-C: `block_type='block8'`
+
+    Args:
+        scale                         (float): scaling factor to scale the residuals before adding
+                them to the shortcut branch. Let `r` be the output from the residual branch, the output of this
+                block will be `x + scale * r`
+        block_type (block35, block17, block8): determines the network structure in the residual branch
+        activation         (keras Activation): activation to be applied in convolution layers, default: relu
+        use_bias                       (bool): whether the convolution layers use a bias vector, defalut: False
+        end_activation         (keras Activation): activation to use at the end of the block, default: relu
+    """
+
+    def __init__(
+        self,
+        scale,
+        block_type,
+        activation="relu",
+        use_bias=False,
+        end_activation="relu",
+    ):
+        super().__init__()
+        self.scale = scale
+        self.block_type = block_type
+        self.activation = activation
+        self.use_bias = use_bias
+        self.end_activation = end_activation
+
+    def __call__(self, inputs):
+        x = inputs
+        if self.block_type == "block35":
+            branch_0 = InceptionResNetConv2D(
+                32, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                32, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                32, 3, activation=self.activation, use_bias=self.use_bias
+            )(branch_1)
+            branch_2 = InceptionResNetConv2D(
+                32, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_2 = InceptionResNetConv2D(
+                48, 3, activation=self.activation, use_bias=self.use_bias
+            )(branch_2)
+            branch_2 = InceptionResNetConv2D(
+                64, 3, activation=self.activation, use_bias=self.use_bias
+            )(branch_2)
+            branches = [branch_0, branch_1, branch_2]
+        elif self.block_type == "block17":
+            branch_0 = InceptionResNetConv2D(
+                192, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                128, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                160, [1, 7], activation=self.activation, use_bias=self.use_bias
+            )(branch_1)
+            branch_1 = InceptionResNetConv2D(
+                192, [7, 1], activation=self.activation, use_bias=self.use_bias
+            )(branch_1)
+            branches = [branch_0, branch_1]
+        elif self.block_type == "block8":
+            branch_0 = InceptionResNetConv2D(
+                192, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                192, 1, activation=self.activation, use_bias=self.use_bias
+            )(x)
+            branch_1 = InceptionResNetConv2D(
+                224, [1, 3], activation=self.activation, use_bias=self.use_bias
+            )(branch_1)
+            branch_1 = InceptionResNetConv2D(
+                256, [3, 1], activation=self.activation, use_bias=self.use_bias
+            )(branch_1)
+            branches = [branch_0, branch_1]
+        else:
+            raise ValueError(
+                "Unknown Inception-ResNet block type. "
+                'Expects "block35", "block17" or "block8", '
+                "but got: " + str(self.block_type)
+            )
+
+        mixed = layers.Concatenate()(branches)
+        up = InceptionResNetConv2D(x.shape[3], 1, activation=None, use_bias=True)(mixed)
+
+        x = layers.Lambda(
+            lambda inputs, scale: inputs[0] + inputs[1] * scale,
+            output_shape=tuple(x.shape[1:]),
+            arguments={"scale": self.scale},
+        )([x, up])
+        if self.activation is not None:
+            x = layers.Activation(self.end_activation)(x)
+        return x
+    
