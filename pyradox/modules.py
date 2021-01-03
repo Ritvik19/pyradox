@@ -714,3 +714,74 @@ class ResNeXtBlock(layers.Layer):
         x = layers.Add()([shortcut, x])
         x = layers.Activation(self.activation)(x)
         return x
+
+
+class ConvSkipConnection(layers.Layer):
+    """Implementation of Skip Connection for Convolution Layer
+
+    Args:
+        num_filters                   (int): the number of output filters in the convolution, default: 32
+        kernel_size (int/tuple of two ints): the height and width of the 2D convolution window,
+                single integer specifies the same value for both dimensions, default: 3
+        activation       (keras Activation): activation to be applied, default: relu
+        batch_normalization          (bool): whether to use Batch Normalization, default: False
+        dropout                     (float): the dropout rate, default: 0
+        kwargs          (keyword arguments): the arguments for Convolution Layer
+    """
+
+    def __init__(
+        self,
+        num_filters,
+        kernel_size=3,
+        activation="relu",
+        batch_normalization=False,
+        dropout=0,
+        **kwargs
+    ):
+        super().__init__()
+        self.num_filters = num_filters
+        self.kernel_size = kernel_size
+        self.activation = activation
+        self.batch_normalization = batch_normalization
+        self.dropout = dropout
+        self.kwargs = kwargs
+
+    def __call__(self, inputs):
+        x = inputs
+
+        skip_connection = layers.Conv2D(
+            self.num_filters, self.kernel_size, padding="same", **self.kwargs
+        )(x)
+        if self.batch_normalization:
+            skip_connection = layers.BatchNormalization()(skip_connection)
+        skip_connection = layers.Activation(self.activation)(skip_connection)
+
+        skip_connection = layers.Conv2D(
+            self.num_filters, self.kernel_size, padding="same", **self.kwargs
+        )(skip_connection)
+
+        x = layers.add([skip_connection, x])
+        if self.batch_normalization:
+            x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+        if self.dropout > 0:
+            x = layers.Dropout(self.dropout)(x)
+        return x
+
+
+class Rescale(layers.Layer):
+    """A layer that rescales the input
+    x_out = (x_in -mu) / sigma
+
+    Args:
+        mu    (float): poplation mean, default: 0
+        sigma (float): population standard deviation, default: 255
+    """
+
+    def __init__(self, mu=0.0, sigma=255.0):
+        super().__init__()
+        self.mu = mu
+        self.sigma = sigma
+
+    def __call__(self, inputs):
+        return (inputs - self.mu) / self.sigma

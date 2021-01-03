@@ -11,19 +11,21 @@ ___
 ## Usage
 
 1. Modules
-   1. [Convolution2D](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/Convolution2D.ipynb) Applies 2D Convolution followed by Batch Normalization (optional) and Dropout (optional)
-   2. [DenselyConnected](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnected.ipynb) Densely Connected Layer followed by Batch Normalization (optional) and Dropout (optional)
-   3. [DenseNetConvolutionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseNetConvolutionBlock.ipynb) A Convolution block for DenseNets
-   4. [DenseNetTransitionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseNetTransitionBlock.ipynb) A Transition block for DenseNets
-   5. [DenseSkipConnection](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseSkipConnection.ipynb) Implementation of a skip connection for densely connected layer
-   6. [VGGModule](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/VGG-Module.ipynb) Implementation of VGG Modules with slight modifications, Applies multiple 2D Convolution followed by Batch Normalization (optional), Dropout (optional) and MaxPooling
-   7. [InceptionConv](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionConv.ipynb) Implementation of 2D Convolution Layer for Inception Net, Convolution Layer followed by Batch Normalization, Activation and optional Dropout
-   8. [InceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionBlock.ipynb) Implementation on Inception Mixing Block
-   9. [XceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/XceptionBlock.ipynb) A customised implementation of Xception Block (Depthwise Separable Convolutions)
-   10. [EfficientNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetBlock.ipynb) Implementation of Efficient Net Block (Depthwise Separable Convolutions)
-   11. [ResNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetBlock.ipynb) Customized Implementation of ResNet Block
-   12. [ResNetV2Block](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetV2Block.ipynb) Customized Implementation of ResNetV2 Block
-   13. [ResNeXtBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXtBlock.ipynb) Customized Implementation of ResNeXt Block
+   1. [Rescale](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/Rescale.ipynb) A layer that rescales the input: x_out = (x_in -mu) / sigma
+   2. [Convolution2D](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/Convolution2D.ipynb) Applies 2D Convolution followed by Batch Normalization (optional) and Dropout (optional)
+   3. [DenselyConnected](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnected.ipynb) Densely Connected Layer followed by Batch Normalization (optional) and Dropout (optional)
+   4. [DenseNetConvolutionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseNetConvolutionBlock.ipynb) A Convolution block for DenseNets
+   5. [DenseNetTransitionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseNetTransitionBlock.ipynb) A Transition block for DenseNets
+   6. [DenseSkipConnection](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenseSkipConnection.ipynb) Implementation of a skip connection for densely connected layer
+   7. [VGGModule](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/VGG-Module.ipynb) Implementation of VGG Modules with slight modifications, Applies multiple 2D Convolution followed by Batch Normalization (optional), Dropout (optional) and MaxPooling
+   8. [InceptionConv](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionConv.ipynb) Implementation of 2D Convolution Layer for Inception Net, Convolution Layer followed by Batch Normalization, Activation and optional Dropout
+   9. [InceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionBlock.ipynb) Implementation on Inception Mixing Block
+   10. [XceptionBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/XceptionBlock.ipynb) A customised implementation of Xception Block (Depthwise Separable Convolutions)
+   11. [EfficientNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/EfficientNetBlock.ipynb) Implementation of Efficient Net Block (Depthwise Separable Convolutions)
+   12. [ConvSkipConnection](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ConvSkipConnection.ipynb) Implementation of Skip Connection for Convolution Layer
+   13. [ResNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetBlock.ipynb) Customized Implementation of ResNet Block
+   14. [ResNetV2Block](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNetV2Block.ipynb) Customized Implementation of ResNetV2 Block
+   15. [ResNeXtBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXtBlock.ipynb) Customized Implementation of ResNeXt Block
 2. ConvNets
    1.  [GeneralizedDenseNets](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/GeneralizedDenseNets.ipynb) A generalization of Densely Connected Convolutional Networks (Dense Nets)
    2.  [DenselyConnectedConvolutionalNetwork121](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedConvolutionalNetwork121.ipynb) A modified implementation of Densely Connected Convolutional Network 121
