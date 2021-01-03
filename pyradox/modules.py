@@ -936,4 +936,386 @@ class InceptionResNetBlock(layers.Layer):
         if self.activation is not None:
             x = layers.Activation(self.end_activation)(x)
         return x
-    
+
+
+class NASNetSeparableConvBlock(layers.Layer):
+    """Adds 2 blocks of Separable Conv Batch Norm
+
+    Args:
+        filters                  (int): filters of the separable conv layer
+        kernel_size (tuple of two int): kernel size of the separable conv layer, default: (3, 3)
+        stride                   (int): stride of the separable conv layer, default: (1, 1)
+        momentum               (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:               (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation  (keras Activation): activation applied after batch normalization, default: relu
+        use_bias                (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size=(3, 3),
+        stride=(1, 1),
+        momentum=0.9997,
+        epsilon=1e-3,
+        activation="relu",
+        use_bias=False,
+    ):
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def correct_pad(self, inputs, kernel_size):
+        """Returns a tuple for zero-padding for 2D convolution with downsampling.
+        Args:
+            inputs: Input tensor.
+            kernel_size: An integer or tuple/list of 2 integers.
+        Returns:
+            A tuple.
+        """
+        input_size = inputs.shape[1:3]
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+        if input_size[0] is None:
+            adjust = (1, 1)
+        else:
+            adjust = (1 - input_size[0] % 2, 1 - input_size[1] % 2)
+        correct = (kernel_size[0] // 2, kernel_size[1] // 2)
+        return (
+            (correct[0] - adjust[0], correct[0]),
+            (correct[1] - adjust[1], correct[1]),
+        )
+
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.Activation(self.activation)(x)
+        if self.stride == (2, 2):
+            x = layers.ZeroPadding2D(padding=self.correct_pad(x, self.kernel_size))(x)
+            conv_pad = "valid"
+        else:
+            conv_pad = "same"
+
+        x = layers.SeparableConv2D(
+            self.filters,
+            self.kernel_size,
+            strides=self.stride,
+            padding=conv_pad,
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization(
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+        )(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.SeparableConv2D(
+            self.filters,
+            self.kernel_size,
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization(
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+        )(x)
+        return x
+
+
+class NASNetAdjustBlock(layers.Layer):
+    """Adjusts the input `previous path` to match the shape of the `input`
+
+    Args:
+        filters                  (int): filters of the separable conv layer
+        momentum               (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:               (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation  (keras Activation): activation applied after batch normalization, default: relu
+        use_bias                (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        momentum=0.9997,
+        epsilon=1e-3,
+        activation="relu",
+        use_bias=False,
+    ):
+        self.filters = filters
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def __call__(self, p, ip):
+        if p is None:
+            p = ip
+        ip_shape = tuple(ip.shape)
+        p_shape = tuple(p.shape)
+
+        if p_shape[-2] != ip_shape[-2]:
+            p = layers.Activation(self.activation)(p)
+            p1 = layers.AveragePooling2D((1, 1), strides=(2, 2), padding="valid")(p)
+            p1 = layers.Conv2D(
+                self.filters // 2, (1, 1), padding="same", use_bias=self.use_bias
+            )(p1)
+
+            p2 = layers.ZeroPadding2D(padding=((0, 1), (0, 1)))(p)
+            p2 = layers.Cropping2D(cropping=((1, 0), (1, 0)))(p2)
+            p2 = layers.AveragePooling2D((1, 1), strides=(2, 2), padding="valid")(p2)
+            p2 = layers.Conv2D(
+                self.filters // 2, (1, 1), padding="same", use_bias=self.use_bias
+            )(p2)
+
+            p = layers.concatenate([p1, p2])
+            p = layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon)(
+                p
+            )
+        elif p_shape[-1] != self.filters:
+            p = layers.Activation(self.activation)(p)
+            p = layers.Conv2D(
+                self.filters,
+                (1, 1),
+                strides=(1, 1),
+                padding="same",
+                use_bias=self.use_bias,
+            )(p)
+            p = layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon)(
+                p
+            )
+        return p
+
+
+class NASNetNormalACell(layers.Layer):
+    """Normal cell for NASNet-A
+
+    Args:
+        filters                  (int): filters of the separable conv layer
+        momentum               (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:               (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation  (keras Activation): activation applied after batch normalization, default: relu
+        use_bias                (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        momentum=0.9997,
+        epsilon=1e-3,
+        activation="relu",
+        use_bias=False,
+    ):
+        self.filters = filters
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def __call__(self, ip, p):
+        p = NASNetAdjustBlock(
+            self.filters, self.momentum, self.epsilon, self.activation, self.use_bias
+        )(p, ip)
+
+        h = layers.Activation(self.activation)(ip)
+        h = layers.Conv2D(
+            self.filters,
+            (1, 1),
+            strides=(1, 1),
+            padding="same",
+            use_bias=self.use_bias,
+        )(h)
+        h = layers.BatchNormalization(
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+        )(h)
+
+        x1_1 = NASNetSeparableConvBlock(
+            self.filters,
+            kernel_size=(5, 5),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(h)
+        x1_2 = NASNetSeparableConvBlock(
+            self.filters,
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(h)
+        x1 = layers.add([x1_1, x1_2])
+
+        x2_1 = NASNetSeparableConvBlock(
+            self.filters,
+            kernel_size=(5, 5),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(p)
+        x2_2 = NASNetSeparableConvBlock(
+            self.filters,
+            kernel_size=(3, 3),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(p)
+        x2 = layers.add([x2_1, x2_2])
+
+        x3 = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(h)
+        x3 = layers.add([x3, p])
+
+        x4_1 = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(p)
+        x4_2 = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(p)
+        x4 = layers.add([x4_1, x4_2])
+
+        x5 = NASNetSeparableConvBlock(
+            self.filters,
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(h)
+        x5 = layers.add([x5, h])
+
+        x = layers.concatenate([p, x1, x2, x3, x4, x5])
+
+        return x, ip
+
+
+class NASNetReductionACell(layers.Layer):
+    """Reduction cell for NASNet-A
+
+    Args:
+        filters                  (int): filters of the separable conv layer
+        momentum               (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:               (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation  (keras Activation): activation applied after batch normalization, default: relu
+        use_bias                (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        momentum=0.9997,
+        epsilon=1e-3,
+        activation="relu",
+        use_bias=False,
+    ):
+        self.filters = filters
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def correct_pad(self, inputs, kernel_size):
+        """Returns a tuple for zero-padding for 2D convolution with downsampling.
+        Args:
+            inputs: Input tensor.
+            kernel_size: An integer or tuple/list of 2 integers.
+        Returns:
+            A tuple.
+        """
+        input_size = inputs.shape[1:3]
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+        if input_size[0] is None:
+            adjust = (1, 1)
+        else:
+            adjust = (1 - input_size[0] % 2, 1 - input_size[1] % 2)
+        correct = (kernel_size[0] // 2, kernel_size[1] // 2)
+        return (
+            (correct[0] - adjust[0], correct[0]),
+            (correct[1] - adjust[1], correct[1]),
+        )
+
+    def __call__(self, ip, p):
+        p = NASNetAdjustBlock(
+            self.filters, self.momentum, self.epsilon, self.activation, self.use_bias
+        )(p, ip)
+
+        h = layers.Activation(self.activation)(ip)
+        h = layers.Conv2D(
+            self.filters, (1, 1), strides=(1, 1), padding="same", use_bias=self.use_bias
+        )(h)
+        h = layers.BatchNormalization(
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+        )(h)
+        h3 = layers.ZeroPadding2D(
+            padding=self.correct_pad(h, 3),
+        )(h)
+
+        x1_1 = NASNetSeparableConvBlock(
+            self.filters,
+            (5, 5),
+            stride=(2, 2),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(h)
+        x1_2 = NASNetSeparableConvBlock(
+            self.filters,
+            (7, 7),
+            stride=(2, 2),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(p)
+        x1 = layers.add([x1_1, x1_2])
+
+        x2_1 = layers.MaxPooling2D((3, 3), strides=(2, 2), padding="valid")(h3)
+        x2_2 = NASNetSeparableConvBlock(
+            self.filters,
+            (7, 7),
+            stride=(2, 2),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(p)
+        x2 = layers.add([x2_1, x2_2])
+
+        x3_1 = layers.AveragePooling2D((3, 3), strides=(2, 2), padding="valid")(h3)
+        x3_2 = NASNetSeparableConvBlock(
+            self.filters,
+            (5, 5),
+            stride=(2, 2),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(p)
+        x3 = layers.add([x3_1, x3_2])
+
+        x4 = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(x1)
+        x4 = layers.add([x2, x4])
+
+        x5_1 = NASNetSeparableConvBlock(
+            self.filters,
+            (3, 3),
+            momentum=self.momentum,
+            epsilon=self.epsilon,
+            activation=self.activation,
+            use_bias=self.use_bias,
+        )(x1)
+        x5_2 = layers.MaxPooling2D(
+            (3, 3),
+            strides=(2, 2),
+            padding="valid",
+        )(h3)
+        x5 = layers.add([x5_1, x5_2])
+
+        x = layers.concatenate([x2, x3, x4, x5])
+
+        return x, ip

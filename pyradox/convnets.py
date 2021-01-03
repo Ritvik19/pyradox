@@ -151,7 +151,7 @@ class GeneralizedVGG(layers.Layer):
         dense_batch_norm=False,
         dense_dropout=0,
         dense_activation="relu",
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.conv_config = conv_config
@@ -210,7 +210,7 @@ class VGG16(GeneralizedVGG):
         dense_batch_norm=False,
         dense_dropout=0,
         dense_activation="relu",
-        **kwargs
+        **kwargs,
     ):
         conv_config = [
             (2, 64),
@@ -229,7 +229,7 @@ class VGG16(GeneralizedVGG):
             dense_batch_norm,
             dense_dropout,
             dense_activation,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -257,7 +257,7 @@ class VGG19(GeneralizedVGG):
         dense_batch_norm=False,
         dense_dropout=0,
         dense_activation="relu",
-        **kwargs
+        **kwargs,
     ):
         conv_config = [
             (2, 64),
@@ -276,7 +276,7 @@ class VGG19(GeneralizedVGG):
             dense_batch_norm,
             dense_dropout,
             dense_activation,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -307,7 +307,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         x = InceptionConv(
             32,
@@ -317,7 +317,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         x = InceptionConv(
             64,
@@ -327,7 +327,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
         x = InceptionConv(
@@ -338,7 +338,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         x = InceptionConv(
             192,
@@ -348,7 +348,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
 
@@ -361,7 +361,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
 
         branch5x5 = InceptionConv(
@@ -372,7 +372,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch5x5 = InceptionConv(
             64,
@@ -382,7 +382,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch5x5)
 
         branch3x3dbl = InceptionConv(
@@ -393,7 +393,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch3x3dbl = InceptionConv(
             96,
@@ -403,7 +403,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch3x3dbl)
         branch3x3dbl = InceptionConv(
             96,
@@ -413,7 +413,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch3x3dbl)
 
         branch_pool = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(x)
@@ -425,7 +425,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch_pool)
         x = layers.concatenate(
             [branch1x1, branch5x5, branch3x3dbl, branch_pool],
@@ -441,7 +441,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
 
             branch5x5 = InceptionConv(
@@ -452,7 +452,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch5x5 = InceptionConv(
                 64,
@@ -462,7 +462,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch5x5)
 
             branch3x3dbl = InceptionConv(
@@ -473,7 +473,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch3x3dbl = InceptionConv(
                 96,
@@ -483,7 +483,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3dbl)
             branch3x3dbl = InceptionConv(
                 96,
@@ -493,7 +493,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3dbl)
 
             branch_pool = layers.AveragePooling2D(
@@ -507,7 +507,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch_pool)
             x = layers.concatenate(
                 [branch1x1, branch5x5, branch3x3dbl, branch_pool],
@@ -522,7 +522,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
 
         branch3x3dbl = InceptionConv(
@@ -533,7 +533,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch3x3dbl = InceptionConv(
             96,
@@ -543,7 +543,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch3x3dbl)
         branch3x3dbl = InceptionConv(
             96,
@@ -553,7 +553,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch3x3dbl)
 
         branch_pool = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
@@ -568,7 +568,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
 
         branch7x7 = InceptionConv(
@@ -579,7 +579,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch7x7 = InceptionConv(
             128,
@@ -589,7 +589,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7)
         branch7x7 = InceptionConv(
             192,
@@ -599,7 +599,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7)
 
         branch7x7dbl = InceptionConv(
@@ -610,7 +610,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch7x7dbl = InceptionConv(
             128,
@@ -620,7 +620,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             128,
@@ -630,7 +630,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             128,
@@ -640,7 +640,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             192,
@@ -650,7 +650,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
 
         branch_pool = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(x)
@@ -662,7 +662,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch_pool)
         x = layers.concatenate([branch1x1, branch7x7, branch7x7dbl, branch_pool])
 
@@ -676,7 +676,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
 
             branch7x7 = InceptionConv(
@@ -687,7 +687,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch7x7 = InceptionConv(
                 160,
@@ -697,7 +697,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7)
             branch7x7 = InceptionConv(
                 192,
@@ -707,7 +707,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7)
 
             branch7x7dbl = InceptionConv(
@@ -718,7 +718,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch7x7dbl = InceptionConv(
                 160,
@@ -728,7 +728,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7dbl)
             branch7x7dbl = InceptionConv(
                 160,
@@ -738,7 +738,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7dbl)
             branch7x7dbl = InceptionConv(
                 160,
@@ -748,7 +748,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7dbl)
             branch7x7dbl = InceptionConv(
                 192,
@@ -758,7 +758,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch7x7dbl)
 
             branch_pool = layers.AveragePooling2D(
@@ -772,7 +772,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch_pool)
             x = layers.concatenate([branch1x1, branch7x7, branch7x7dbl, branch_pool])
 
@@ -785,7 +785,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
 
         branch7x7 = InceptionConv(
@@ -796,7 +796,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch7x7 = InceptionConv(
             192,
@@ -806,7 +806,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7)
         branch7x7 = InceptionConv(
             192,
@@ -816,7 +816,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7)
 
         branch7x7dbl = InceptionConv(
@@ -827,7 +827,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch7x7dbl = InceptionConv(
             192,
@@ -837,7 +837,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             192,
@@ -847,7 +847,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             192,
@@ -857,7 +857,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
         branch7x7dbl = InceptionConv(
             192,
@@ -867,7 +867,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7dbl)
 
         branch_pool = layers.AveragePooling2D((3, 3), strides=(1, 1), padding="same")(x)
@@ -879,7 +879,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch_pool)
         x = layers.concatenate([branch1x1, branch7x7, branch7x7dbl, branch_pool])
 
@@ -892,7 +892,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch3x3 = InceptionConv(
             320,
@@ -902,7 +902,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch3x3)
 
         branch7x7x3 = InceptionConv(
@@ -913,7 +913,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(x)
         branch7x7x3 = InceptionConv(
             192,
@@ -923,7 +923,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7x3)
         branch7x7x3 = InceptionConv(
             192,
@@ -933,7 +933,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7x3)
         branch7x7x3 = InceptionConv(
             192,
@@ -943,7 +943,7 @@ class InceptionV3(layers.Layer):
             self.use_bias,
             self.activation,
             self.dropout,
-            **self.kwargs
+            **self.kwargs,
         )(branch7x7x3)
 
         branch_pool = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
@@ -959,7 +959,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
 
             branch3x3 = InceptionConv(
@@ -970,7 +970,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch3x3_1 = InceptionConv(
                 384,
@@ -980,7 +980,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3)
             branch3x3_2 = InceptionConv(
                 384,
@@ -990,7 +990,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3)
             branch3x3 = layers.concatenate([branch3x3_1, branch3x3_2])
 
@@ -1002,7 +1002,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             branch3x3dbl = InceptionConv(
                 384,
@@ -1012,7 +1012,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3dbl)
             branch3x3dbl_1 = InceptionConv(
                 384,
@@ -1022,7 +1022,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3dbl)
             branch3x3dbl_2 = InceptionConv(
                 384,
@@ -1032,7 +1032,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch3x3dbl)
             branch3x3dbl = layers.concatenate([branch3x3dbl_1, branch3x3dbl_2])
 
@@ -1047,7 +1047,7 @@ class InceptionV3(layers.Layer):
                 self.use_bias,
                 self.activation,
                 self.dropout,
-                **self.kwargs
+                **self.kwargs,
             )(branch_pool)
             x = layers.concatenate([branch1x1, branch3x3, branch3x3dbl, branch_pool])
 
@@ -1408,7 +1408,7 @@ class EfficientNet(layers.Layer):
                 x = EfficientNetBlock(
                     activation=self.activation,
                     dropout=self.drop_connect_rate * b / blocks,
-                    **args
+                    **args,
                 )(x)
                 b += 1
 
@@ -1536,7 +1536,7 @@ class ResNet(layers.Layer):
         epsilon=1.001e-5,
         activation="relu",
         use_bias=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.resnet_config = resnet_config
@@ -1564,7 +1564,7 @@ class ResNet(layers.Layer):
                     activation=self.activation,
                     use_bias=self.use_bias,
                     stride=2,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
                 for _ in range(2, blocks + 1):
                     x = ResNetBlock(
@@ -1573,7 +1573,7 @@ class ResNet(layers.Layer):
                         activation=self.activation,
                         use_bias=self.use_bias,
                         conv_shortcut=False,
-                        **self.kwargs
+                        **self.kwargs,
                     )(x)
             else:
                 x = ResNetBlock(
@@ -1581,7 +1581,7 @@ class ResNet(layers.Layer):
                     epsilon=self.epsilon,
                     activation=self.activation,
                     use_bias=self.use_bias,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
                 for _ in range(2, blocks + 1):
                     x = ResNetBlock(
@@ -1590,7 +1590,7 @@ class ResNet(layers.Layer):
                         activation=self.activation,
                         use_bias=self.use_bias,
                         conv_shortcut=False,
-                        **self.kwargs
+                        **self.kwargs,
                     )(x)
 
         return x
@@ -1613,7 +1613,7 @@ class ResNet50(ResNet):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1634,7 +1634,7 @@ class ResNet101(ResNet):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1655,7 +1655,7 @@ class ResNet152(ResNet):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1677,7 +1677,7 @@ class ResNetV2(layers.Layer):
         epsilon=1.001e-5,
         activation="relu",
         use_bias=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.resnet_config = resnet_config
@@ -1701,7 +1701,7 @@ class ResNetV2(layers.Layer):
                     epsilon=self.epsilon,
                     activation=self.activation,
                     use_bias=self.use_bias,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
                 for _ in range(2, blocks + 1):
                     x = ResNetV2Block(
@@ -1710,7 +1710,7 @@ class ResNetV2(layers.Layer):
                         activation=self.activation,
                         use_bias=self.use_bias,
                         conv_shortcut=False,
-                        **self.kwargs
+                        **self.kwargs,
                     )(x)
                 x = ResNetV2Block(
                     filters=filters,
@@ -1718,7 +1718,7 @@ class ResNetV2(layers.Layer):
                     activation=self.activation,
                     use_bias=self.use_bias,
                     stride=1,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
             else:
                 x = ResNetV2Block(
@@ -1726,7 +1726,7 @@ class ResNetV2(layers.Layer):
                     epsilon=self.epsilon,
                     activation=self.activation,
                     use_bias=self.use_bias,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
                 for _ in range(2, blocks + 1):
                     x = ResNetV2Block(
@@ -1735,7 +1735,7 @@ class ResNetV2(layers.Layer):
                         activation=self.activation,
                         use_bias=self.use_bias,
                         conv_shortcut=False,
-                        **self.kwargs
+                        **self.kwargs,
                     )(x)
                 x = ResNetV2Block(
                     filters=filters,
@@ -1743,7 +1743,7 @@ class ResNetV2(layers.Layer):
                     activation=self.activation,
                     use_bias=self.use_bias,
                     stride=2,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
 
         x = layers.BatchNormalization(epsilon=self.epsilon)(x)
@@ -1769,7 +1769,7 @@ class ResNet50V2(ResNetV2):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1790,7 +1790,7 @@ class ResNet101V2(ResNetV2):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1811,7 +1811,7 @@ class ResNet152V2(ResNetV2):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1833,7 +1833,7 @@ class ResNeXt(layers.Layer):
         epsilon=1.001e-5,
         activation="relu",
         use_bias=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.resnet_config = resnet_config
@@ -1860,7 +1860,7 @@ class ResNeXt(layers.Layer):
                 activation=self.activation,
                 use_bias=self.use_bias,
                 stride=2,
-                **self.kwargs
+                **self.kwargs,
             )(x)
             for _ in range(2, blocks + 1):
                 x = ResNeXtBlock(
@@ -1869,7 +1869,7 @@ class ResNeXt(layers.Layer):
                     activation=self.activation,
                     use_bias=self.use_bias,
                     conv_shortcut=False,
-                    **self.kwargs
+                    **self.kwargs,
                 )(x)
 
         return x
@@ -1892,7 +1892,7 @@ class ResNeXt50(ResNeXt):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1913,7 +1913,7 @@ class ResNeXt101(ResNeXt):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1934,7 +1934,7 @@ class ResNeXt152(ResNeXt):
             epsilon=epsilon,
             activation=activation,
             use_bias=use_bias,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -2117,3 +2117,194 @@ class InceptionResNetV2(layers.Layer):
         )(x)
 
         return x
+
+
+class NASNet(layers.Layer):
+    """Generalised Implementation of NASNet
+    NASNet models use the notation `NASNet (N @ P)`, where:
+        -   N is the number of blocks
+        -   P is the number of penultimate filters
+
+    Args:
+        penultimate_filters     (int): Number of filters in the penultimate layer, default: 4036
+        num_blocks              (int): Number of repeated blocks of the NASNet model, default: 6
+        stem_block_filters      (int): Number of filters in the initial stem block, default:96
+        skip_reduction         (bool): Whether to skip the reduction step at the tail end of the network,
+                    default: True
+        filter_multiplier       (int): Controls the width of the network, default: 2
+                    - If `filter_multiplier` < 1.0, proportionally decreases the number
+                        of filters in each layer.
+                    - If `filter_multiplier` > 1.0, proportionally increases the number
+                        of filters in each layer.
+                    - If `filter_multiplier` = 1, default number of filters from the
+                        paper are used at each layer.
+        momentum              (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        penultimate_filters=4036,
+        num_blocks=6,
+        stem_block_filters=96,
+        skip_reduction=True,
+        filter_multiplier=2,
+        momentum=0.9997,
+        epsilon=1e-3,
+        activation="relu",
+        use_bias=False,
+    ):
+        super().__init__()
+        self.penultimate_filters = penultimate_filters
+        self.num_blocks = num_blocks
+        self.stem_block_filters = stem_block_filters
+        self.skip_reduction = skip_reduction
+        self.filter_multiplier = filter_multiplier
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.activation = activation
+        self.use_bias = use_bias
+
+        if penultimate_filters % (24 * (filter_multiplier ** 2)) != 0:
+            raise ValueError(
+                f"For NASNet-A models, the `penultimate_filters` must be a multiple "
+                "of 24 * (`filter_multiplier` ** 2). Current value: {penultimate_filters}"
+            )
+
+    def __call__(self, inputs):
+        x = inputs
+
+        filters = self.penultimate_filters // 24
+        x = layers.Conv2D(
+            self.stem_block_filters,
+            (3, 3),
+            strides=(2, 2),
+            padding="valid",
+            use_bias=self.use_bias,
+        )(x)
+
+        x = layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon)(x)
+
+        p = None
+        x, p = NASNetReductionACell(
+            filters // (self.filter_multiplier ** 2),
+            self.momentum,
+            self.epsilon,
+            self.activation,
+            self.use_bias,
+        )(x, p)
+        x, p = NASNetReductionACell(
+            filters // self.filter_multiplier,
+            self.momentum,
+            self.epsilon,
+            self.activation,
+            self.use_bias,
+        )(x, p)
+
+        for _ in range(self.num_blocks):
+            x, p = NASNetNormalACell(
+                filters,
+                self.momentum,
+                self.epsilon,
+                self.activation,
+                self.use_bias,
+            )(x, p)
+
+        x, p0 = NASNetReductionACell(
+            filters * self.filter_multiplier,
+            self.momentum,
+            self.epsilon,
+            self.activation,
+            self.use_bias,
+        )(x, p)
+
+        p = p0 if not self.skip_reduction else p
+
+        for _ in range(self.num_blocks):
+            x, p = NASNetNormalACell(
+                filters * self.filter_multiplier,
+                self.momentum,
+                self.epsilon,
+                self.activation,
+                self.use_bias,
+            )(x, p)
+
+        x, p0 = NASNetReductionACell(
+            filters * self.filter_multiplier ** 2,
+            self.momentum,
+            self.epsilon,
+            self.activation,
+            self.use_bias,
+        )(x, p)
+
+        p = p0 if not self.skip_reduction else p
+
+        for _ in range(self.num_blocks):
+            x, p = NASNetNormalACell(
+                filters * self.filter_multiplier ** 2,
+                self.momentum,
+                self.epsilon,
+                self.activation,
+                self.use_bias,
+            )(x, p)
+
+        x = layers.Activation(self.activation)(x)
+
+        return x
+
+
+class NASNetMobile(NASNet):
+    """Customized Implementation of NAS Net Mobile
+
+    Args:
+        momentum              (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self, momentum=0.9997, epsilon=1e-3, activation="relu", use_bias=False
+    ):
+        super().__init__(
+            penultimate_filters=1056,
+            num_blocks=4,
+            stem_block_filters=32,
+            skip_reduction=False,
+            filter_multiplier=2,
+            momentum=momentum,
+            epsilon=epsilon,
+            activation=activation,
+            use_bias=use_bias,
+        )
+
+
+class NASNetLarge(NASNet):
+    """Customized Implementation of NAS Net Large
+
+    Args:
+        momentum              (float): momentum for the moving average in batch normalization, default: 0.9997
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+        activation (keras Activation): activation applied after batch normalization, default: relu
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self, momentum=0.9997, epsilon=1e-3, activation="relu", use_bias=False
+    ):
+        super().__init__(
+            penultimate_filters=4032,
+            num_blocks=6,
+            stem_block_filters=96,
+            skip_reduction=True,
+            filter_multiplier=2,
+            momentum=momentum,
+            epsilon=epsilon,
+            activation=activation,
+            use_bias=use_bias,
+        )

@@ -28,6 +28,10 @@ ___
    15. [ResNeXtBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXtBlock.ipynb) Customized Implementation of ResNeXt Block
    16. [InceptionResNetConv2D](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionResNetConv2D.ipynb) Implementation of Convolution Layer for Inception Res Net: Convolution2d followed by Batch Norm
    17. [InceptionResNetBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionResNetBlock-1.ipynb) Implementation of Inception-ResNet block [Block 17](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionResNetBlock-2.ipynb) [Block 35](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionResNetBlock-3.ipynb)
+   18. [NASNetSeparableConvBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetSeparableConvBlock.ipynb) Adds 2 blocks of Separable Conv Batch Norm
+   19. NASNetAdjustBlock: Adjusts the input `previous path` to match the shape of the `input`
+   20. NASNetNormalACell: Normal cell for NASNet-A
+   21. NASNetReductionACell: Reduction cell for NASNet-A
 2. ConvNets
    1.  [GeneralizedDenseNets](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/GeneralizedDenseNets.ipynb) A generalization of Densely Connected Convolutional Networks (Dense Nets)
    2.  [DenselyConnectedConvolutionalNetwork121](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedConvolutionalNetwork121.ipynb) A modified implementation of Densely Connected Convolutional Network 121
@@ -61,6 +65,9 @@ ___
    30. [ResNeXt101](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt101.ipynb) Customized Implementation of ResNeXt101
    31. [ResNeXt152](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/ResNeXt152.ipynb) Customized Implementation of ResNeXt152
    32. [InceptionResNetV2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InceptionResNetV2.ipynb) Customized Implementation of InceptionResNetV2
+   33. [NASNet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNet.ipynb) Generalised Implementation of NASNet
+   34. [NASNetMobile](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetMobile.ipynb) Customized Implementation of NASNet Mobile
+   35. [NASNetLarge](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetLarge.ipynb) Customized Implementation of NASNet Large
 3. DenseNets
    1. [DenselyConnectedNetwork](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedNetwork.ipynb) Network of Densely Connected Layers followed by Batch Normalization (optional) and Dropout (optional)
    2. [DenselyConnectedResnet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedResnet) Network of skip connections for densely connected layer
