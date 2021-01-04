@@ -1,6 +1,7 @@
 import math, copy
 from keras import layers
 from pyradox.modules import *
+from tensorflow.keras.activations import swish, relu
 
 
 class GeneralizedDenseNets(layers.Layer):
@@ -2308,3 +2309,72 @@ class NASNetLarge(NASNet):
             activation=activation,
             use_bias=use_bias,
         )
+
+
+class MobileNet(layers.Layer):
+    """Generalized implementation of Mobile Net
+
+    Args:
+        config     (tuple of two int): number of filters and stride dim for conv and depthwise conv layer
+        alpha                 (float): controls the width of the network
+                    - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
+                    - If `alpha` > 1.0, proportionally increases the number of filters in each layer
+                    - If `alpha` = 1, default number of filters from the paper are used at each laye
+        depth_multiplier      (int): number of depthwise convolution output channels for each input channel, default: 1
+        activation (keras Activation): activation applied after batch normalization, default: relu6
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        config="default",
+        alpha=1.0,
+        depth_multiplier=1,
+        activation=lambda x: relu(x, max_value=6),
+        use_bias=False,
+    ):
+        super().__init__()
+        self.config = config
+        self.alpha = alpha
+        self.depth_multiplier = depth_multiplier
+        self.activation = activation
+        self.use_bias = use_bias
+        if config == "default":
+            self.config = [
+                (32, 2),
+                (64, 1),
+                (128, 2),
+                (128, 1),
+                (256, 2),
+                (256, 1),
+                (512, 2),
+                (512, 1),
+                (512, 1),
+                (512, 1),
+                (512, 1),
+                (512, 1),
+                (1024, 2),
+                (1024, 1),
+            ]
+
+    def __call__(self, inputs):
+        x = inputs
+        for i, (filters, strides) in enumerate(self.config):
+            if i == 0:
+                x = MobileNetConvBlock(
+                    filters,
+                    alpha=self.alpha,
+                    strides=strides,
+                    activation=self.activation,
+                    use_bias=self.use_bias,
+                )(x)
+            else:
+                x = MobileNetDepthWiseConvBlock(
+                    filters,
+                    self.alpha,
+                    self.depth_multiplier,
+                    strides,
+                    self.activation,
+                    self.use_bias,
+                )(x)
+        return x

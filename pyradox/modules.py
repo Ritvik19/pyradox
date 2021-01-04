@@ -1,5 +1,5 @@
 from keras import layers
-from tensorflow.keras.activations import swish
+from tensorflow.keras.activations import swish, relu
 
 
 class Convolution2D(layers.Layer):
@@ -1319,3 +1319,113 @@ class NASNetReductionACell(layers.Layer):
         x = layers.concatenate([x2, x3, x4, x5])
 
         return x, ip
+
+
+class MobileNetConvBlock(layers.Layer):
+    """Adds an initial convolution layer with batch normalization and activation
+
+    Args:
+        filters                 (int): filters of the conv layer
+        alpha                 (float): controls the width of the network
+                    - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
+                    - If `alpha` > 1.0, proportionally increases the number of filters in each layer
+                    - If `alpha` = 1, default number of filters from the paper are used at each laye
+        kernel     (tuple of two int): kernel size of the conv layer, default: (3, 3)
+        strides                 (int): stride of the conv layer, default: (1, 1)
+        activation (keras Activation): activation applied after batch normalization, default: relu6
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        filters,
+        alpha,
+        kernel=(3, 3),
+        strides=(1, 1),
+        activation=lambda x: relu(x, max_value=6),
+        use_bias=False,
+    ):
+        super().__init__()
+        self.filters = filters
+        self.alpha = alpha
+        self.kernel = kernel
+        self.strides = strides
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def __call__(self, inputs):
+        x = inputs
+        filters = int(self.filters * self.alpha)
+        x = layers.Conv2D(
+            filters,
+            self.kernel,
+            padding="same",
+            use_bias=self.use_bias,
+            strides=self.strides,
+        )(inputs)
+        x = layers.BatchNormalization()(x)
+        return layers.Activation(self.activation)(x)
+
+
+class MobileNetDepthWiseConvBlock(layers.Layer):
+    """Adds a depthwise convolution block.
+        A depthwise convolution block consists of a depthwise conv,
+        batch normalization, activation, pointwise convolution,
+        batch normalization and activation
+
+    Args:
+        pointwise_conv_filters  (int): filters in the pointwise convolution
+        alpha                 (float): controls the width of the network
+                    - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
+                    - If `alpha` > 1.0, proportionally increases the number of filters in each layer
+                    - If `alpha` = 1, default number of filters from the paper are used at each laye
+        depth_multiplier        (int): number of depthwise convolution output channels for each input channel, default: 1
+        strides                 (int): stride of the separable conv layer, default: (1, 1)
+        activation (keras Activation): activation applied after batch normalization, default: relu6
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+    """
+
+    def __init__(
+        self,
+        pointwise_conv_filters,
+        alpha,
+        depth_multiplier=1,
+        strides=(1, 1),
+        activation=lambda x: relu(x, max_value=6),
+        use_bias=False,
+    ):
+        super().__init__()
+        self.pointwise_conv_filters = pointwise_conv_filters
+        self.alpha = alpha
+        self.depth_multiplier = depth_multiplier
+        self.strides = strides
+        self.activation = activation
+        self.use_bias = use_bias
+
+    def __call__(self, inputs):
+        pointwise_conv_filters = int(self.pointwise_conv_filters * self.alpha)
+
+        if self.strides == (1, 1):
+            x = inputs
+        else:
+            x = layers.ZeroPadding2D(((0, 1), (0, 1)))(inputs)
+
+        x = layers.DepthwiseConv2D(
+            (3, 3),
+            padding="same" if self.strides == (1, 1) else "valid",
+            depth_multiplier=self.depth_multiplier,
+            strides=self.strides,
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.Activation(self.activation)(x)
+
+        x = layers.Conv2D(
+            pointwise_conv_filters,
+            (1, 1),
+            padding="same",
+            use_bias=self.use_bias,
+            strides=(1, 1),
+        )(x)
+        x = layers.BatchNormalization()(x)
+        return layers.Activation(self.activation)(x)
