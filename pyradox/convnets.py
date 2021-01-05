@@ -2378,3 +2378,101 @@ class MobileNet(layers.Layer):
                     self.use_bias,
                 )(x)
         return x
+
+
+class MobileNetV2(layers.Layer):
+    """Generalized implementation of Mobile Net V2
+
+    Args:
+        config     (tuple of two int): number of filters, stride, expansion for and inverted res block
+        alpha                 (float): controls the width of the network
+            - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
+            - If `alpha` > 1.0, proportionally increases the number of filters in each layer
+            - If `alpha` = 1, default number of filters from the paper are used at each layer
+        activation (keras Activation): activation applied after batch normalization, default: relu6
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        momentum              (float): momentum for the moving average in batch normalization, default: 0.999
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+    """
+
+    def __init__(
+        self,
+        config="default",
+        alpha=1,
+        activation=lambda x: relu(x, max_value=6),
+        use_bias=False,
+        momentum=0.999,
+        epsilon=1e-3,
+    ):
+        super().__init__()
+        self.config = config
+        self.alpha = alpha
+        self.activation = activation
+        self.use_bias = use_bias
+        self.momentum = momentum
+        self.epsilon = epsilon
+        if config == "default":
+            self.config = [
+                (16, 1, 1),
+                (24, 2, 6),
+                (24, 1, 6),
+                (32, 2, 6),
+                (32, 1, 6),
+                (32, 1, 6),
+                (64, 2, 6),
+                (64, 1, 6),
+                (64, 1, 6),
+                (64, 1, 6),
+                (96, 2, 6),
+                (96, 1, 6),
+                (96, 1, 6),
+                (160, 2, 6),
+                (160, 1, 6),
+                (160, 1, 6),
+                (320, 1, 6),
+            ]
+
+    def make_divisible(self, v, divisor, min_value=None):
+        if min_value is None:
+            min_value = divisor
+        new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+        # Make sure that round down does not go down by more than 10%.
+        if new_v < 0.9 * v:
+            new_v += divisor
+        return new_v
+
+    def __call__(self, inputs):
+        x = inputs
+        first_block_filters = self.make_divisible(32 * self.alpha, 8)
+        x = layers.Conv2D(
+            first_block_filters,
+            kernel_size=3,
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon, momentum=self.momentum)(x)
+        x = layers.Activation(self.activation)(x)
+
+        for filters, stride, expansion in self.config:
+            x = InvertedResBlock(
+                filters=filters,
+                alpha=self.alpha,
+                stride=stride,
+                expansion=expansion,
+                activation=self.activation,
+                use_bias=self.use_bias,
+                momentum=self.momentum,
+                epsilon=self.epsilon,
+            )(x)
+
+        if self.alpha > 1.0:
+            last_block_filters = self.make_divisible(1280 * self.alpha, 8)
+        else:
+            last_block_filters = 1280
+
+        x = layers.Conv2D(last_block_filters, kernel_size=1, use_bias=self.use_bias)(x)
+        x = layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon)(x)
+        x = layers.Activation(self.activation)(x)
+        return x

@@ -34,6 +34,7 @@ ___
    21. NASNetReductionACell: Reduction cell for NASNet-A
    22. [MobileNetConvBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetConvBlock.ipynb) Adds an initial convolution layer with batch normalization and activation
    23. [MobileNetDepthWiseConvBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetDepthWiseConvBlock.ipynb) Adds a depthwise convolution block. A depthwise convolution block consists of a depthwise conv, batch normalization, activation, pointwise convolution, batch normalization and activation
+   24. [InvertedResBlock](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/InvertedResBlock.ipynb) Inverted ResNet block
 2. ConvNets
    1.  [GeneralizedDenseNets](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/GeneralizedDenseNets.ipynb) A generalization of Densely Connected Convolutional Networks (Dense Nets)
    2.  [DenselyConnectedConvolutionalNetwork121](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedConvolutionalNetwork121.ipynb) A modified implementation of Densely Connected Convolutional Network 121
@@ -71,6 +72,7 @@ ___
    34. [NASNetMobile](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetMobile.ipynb) Customized Implementation of NASNet Mobile
    35. [NASNetLarge](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetLarge.ipynb) Customized Implementation of NASNet Large
    36. [MobileNet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNet-1.ipynb) Generalized implementation of Mobile Net, check [Customised Usage Example](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNet-2.ipynb)
+   37. [MobileNetV2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV2-1.ipynb) Generalized implementation of Mobile Net, check [Customised Usage Example](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV2-2.ipynb)
 3. DenseNets
    1. [DenselyConnectedNetwork](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedNetwork.ipynb) Network of Densely Connected Layers followed by Batch Normalization (optional) and Dropout (optional)
    2. [DenselyConnectedResnet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedResnet) Network of skip connections for densely connected layer
