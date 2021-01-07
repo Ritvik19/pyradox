@@ -2,6 +2,18 @@ from keras import layers
 from tensorflow.keras.activations import swish, relu
 
 
+def relu(x):
+    return layers.ReLU()(x)
+
+
+def hard_sigmoid(x):
+    return layers.ReLU(6.0)(x + 3.0) * (1.0 / 6.0)
+
+
+def hard_swish(x):
+    return layers.Multiply()([hard_sigmoid(x), x])
+
+
 class Convolution2D(layers.Layer):
     """Applies 2D Convolution followed by Batch Normalization (optional) and Dropout (optional)
 
@@ -420,7 +432,7 @@ class EfficientNetBlock(layers.Layer):
         self.se_ratio = se_ratio
         self.id_skip = id_skip
 
-    def correct_pad(self, inputs, kernel_size):
+    def _correct_pad(self, inputs, kernel_size):
         """Returns a tuple for zero-padding for 2D convolution with downsampling.
         Args:
             inputs: Input tensor.
@@ -456,7 +468,7 @@ class EfficientNetBlock(layers.Layer):
         # Depthwise Convolution
         if self.strides == 2:
             x = layers.ZeroPadding2D(
-                padding=self.correct_pad(x, self.kernel_size),
+                padding=self._correct_pad(x, self.kernel_size),
             )(x)
             conv_pad = "valid"
         else:
@@ -970,7 +982,7 @@ class NASNetSeparableConvBlock(layers.Layer):
         self.activation = activation
         self.use_bias = use_bias
 
-    def correct_pad(self, inputs, kernel_size):
+    def _correct_pad(self, inputs, kernel_size):
         """Returns a tuple for zero-padding for 2D convolution with downsampling.
         Args:
             inputs: Input tensor.
@@ -995,7 +1007,7 @@ class NASNetSeparableConvBlock(layers.Layer):
         x = inputs
         x = layers.Activation(self.activation)(x)
         if self.stride == (2, 2):
-            x = layers.ZeroPadding2D(padding=self.correct_pad(x, self.kernel_size))(x)
+            x = layers.ZeroPadding2D(padding=self._correct_pad(x, self.kernel_size))(x)
             conv_pad = "valid"
         else:
             conv_pad = "same"
@@ -1216,7 +1228,7 @@ class NASNetReductionACell(layers.Layer):
         self.activation = activation
         self.use_bias = use_bias
 
-    def correct_pad(self, inputs, kernel_size):
+    def _correct_pad(self, inputs, kernel_size):
         """Returns a tuple for zero-padding for 2D convolution with downsampling.
         Args:
             inputs: Input tensor.
@@ -1251,7 +1263,7 @@ class NASNetReductionACell(layers.Layer):
             epsilon=self.epsilon,
         )(h)
         h3 = layers.ZeroPadding2D(
-            padding=self.correct_pad(h, 3),
+            padding=self._correct_pad(h, 3),
         )(h)
 
         x1_1 = NASNetSeparableConvBlock(
@@ -1447,6 +1459,7 @@ class InvertedResBlock(layers.Layer):
         momentum              (float): momentum for the moving average in batch normalization, default: 0.999
         epsilon:              (float): Small float added to variance to avoid dividing by zero in
                     batch normalisation, default: 1e-3
+        se_ratio:             (float): default: None
     """
 
     def __init__(
@@ -1459,6 +1472,7 @@ class InvertedResBlock(layers.Layer):
         use_bias=False,
         momentum=0.999,
         epsilon=1e-3,
+        se_ratio=None,
     ):
         super().__init__()
         self.filters = filters
@@ -1469,8 +1483,9 @@ class InvertedResBlock(layers.Layer):
         self.use_bias = use_bias
         self.momentum = momentum
         self.epsilon = epsilon
+        self.se_ratio = se_ratio
 
-    def make_divisible(self, v, divisor, min_value=None):
+    def _make_divisible(self, v, divisor, min_value=None):
         if min_value is None:
             min_value = divisor
         new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
@@ -1479,7 +1494,7 @@ class InvertedResBlock(layers.Layer):
             new_v += divisor
         return new_v
 
-    def correct_pad(self, inputs, kernel_size):
+    def _correct_pad(self, inputs, kernel_size):
         """Returns a tuple for zero-padding for 2D convolution with downsampling.
         Args:
             inputs: Input tensor.
@@ -1505,7 +1520,7 @@ class InvertedResBlock(layers.Layer):
 
         in_channels = inputs.shape[-1]
         pointwise_conv_filters = int(self.filters * self.alpha)
-        pointwise_filters = self.make_divisible(pointwise_conv_filters, 8)
+        pointwise_filters = self._make_divisible(pointwise_conv_filters, 8)
 
         # Expand
         x = layers.Conv2D(
@@ -1524,7 +1539,7 @@ class InvertedResBlock(layers.Layer):
         # Depthwise
         if self.stride == 2 or self.stride == (2, 2):
             x = layers.ZeroPadding2D(
-                padding=self.correct_pad(x, 3),
+                padding=self._correct_pad(x, 3),
             )(x)
         x = layers.DepthwiseConv2D(
             kernel_size=3,
@@ -1539,6 +1554,11 @@ class InvertedResBlock(layers.Layer):
         )(x)
 
         x = layers.Activation(self.activation)(x)
+
+        if self.se_ratio:
+            x = SEBlock(
+                self._make_divisible(in_channels * self.expansion, 8), self.se_ratio
+            )(x)
 
         # Project
         x = layers.Conv2D(
@@ -1557,4 +1577,40 @@ class InvertedResBlock(layers.Layer):
             self.stride == 1 or self.stride == (1, 1)
         ):
             return layers.Add()([inputs, x])
+        return x
+
+
+class SEBlock(layers.Layer):
+    """Adds a Squeeze Excite Block
+    Args:
+        filters                 (int): number of input filters
+        se_ratio              (float): parameter for squeeze-and-excite layer
+        activation (keras Activation): activation applied after batch normalization, default: hard_sigmoid
+    """
+
+    def __init__(self, filters, se_ratio, activation=hard_sigmoid):
+        self.filters = filters
+        self.se_ratio = se_ratio
+        self.activation = activation
+
+    def _depth(self, v, divisor=8, min_value=None):
+        if min_value is None:
+            min_value = divisor
+        new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+        # Make sure that round down does not go down by more than 10%.
+        if new_v < 0.9 * v:
+            new_v += divisor
+        return new_v
+
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Reshape((1, 1, self.filters))(x)
+        x = layers.Conv2D(
+            self._depth(self.filters * self.se_ratio), kernel_size=1, padding="same"
+        )(x)
+        x = layers.ReLU()(x)
+        x = layers.Conv2D(self.filters, kernel_size=1, padding="same")(x)
+        x = layers.Activation(self.activation)(x)
+        x = layers.Multiply()([inputs, x])
         return x

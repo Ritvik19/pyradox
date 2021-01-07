@@ -4,6 +4,18 @@ from pyradox.modules import *
 from tensorflow.keras.activations import swish, relu
 
 
+def relu(x):
+    return layers.ReLU()(x)
+
+
+def hard_sigmoid(x):
+    return layers.ReLU(6.0)(x + 3.0) * (1.0 / 6.0)
+
+
+def hard_swish(x):
+    return layers.Multiply()([hard_sigmoid(x), x])
+
+
 class GeneralizedDenseNets(layers.Layer):
     """
     A generalization of Densely Connected Convolutional Networks (Dense Nets)
@@ -1337,7 +1349,7 @@ class EfficientNet(layers.Layer):
                 },
             ]
 
-    def round_filters(self, filters):
+    def _round_filters(self, filters):
         """Round number of filters based on depth multiplier."""
         filters *= self.width_coefficient
         new_filters = max(
@@ -1351,11 +1363,11 @@ class EfficientNet(layers.Layer):
             new_filters += self.depth_divisor
         return int(new_filters)
 
-    def round_repeats(self, repeats):
+    def _round_repeats(self, repeats):
         """Round number of repeats based on depth multiplier."""
         return int(math.ceil(self.depth_coefficient * repeats))
 
-    def correct_pad(self, inputs, kernel_size):
+    def _correct_pad(self, inputs, kernel_size):
         """Returns a tuple for zero-padding for 2D convolution with downsampling.
         Args:
             inputs: Input tensor.
@@ -1380,9 +1392,9 @@ class EfficientNet(layers.Layer):
         x = inputs
 
         # Build stem
-        x = layers.ZeroPadding2D(padding=self.correct_pad(x, 3))(x)
+        x = layers.ZeroPadding2D(padding=self._correct_pad(x, 3))(x)
         x = layers.Conv2D(
-            self.round_filters(32),
+            self._round_filters(32),
             3,
             strides=2,
             padding="valid",
@@ -1394,14 +1406,16 @@ class EfficientNet(layers.Layer):
         blocks_args = copy.deepcopy(self.blocks_args)
 
         b = 0
-        blocks = float(sum(self.round_repeats(args["repeats"]) for args in blocks_args))
+        blocks = float(
+            sum(self._round_repeats(args["repeats"]) for args in blocks_args)
+        )
         for (i, args) in enumerate(blocks_args):
             assert args["repeats"] > 0
             # Update block input and output filters based on depth multiplier.
-            args["filters_in"] = self.round_filters(args["filters_in"])
-            args["filters_out"] = self.round_filters(args["filters_out"])
+            args["filters_in"] = self._round_filters(args["filters_in"])
+            args["filters_out"] = self._round_filters(args["filters_out"])
 
-            for j in range(self.round_repeats(args.pop("repeats"))):
+            for j in range(self._round_repeats(args.pop("repeats"))):
                 # The first block needs to take care of stride and filter size increase.
                 if j > 0:
                     args["strides"] = 1
@@ -1414,7 +1428,7 @@ class EfficientNet(layers.Layer):
                 b += 1
 
         # Build top
-        x = layers.Conv2D(self.round_filters(1280), 1, padding="same", use_bias=False)(
+        x = layers.Conv2D(self._round_filters(1280), 1, padding="same", use_bias=False)(
             x
         )
         x = layers.BatchNormalization()(x)
@@ -2315,7 +2329,7 @@ class MobileNet(layers.Layer):
     """Generalized implementation of Mobile Net
 
     Args:
-        config     (tuple of two int): number of filters and stride dim for conv and depthwise conv layer
+        config       (list of tuples): number of filters and stride dim for conv and depthwise conv layer or 'default'
         alpha                 (float): controls the width of the network
                     - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
                     - If `alpha` > 1.0, proportionally increases the number of filters in each layer
@@ -2384,7 +2398,7 @@ class MobileNetV2(layers.Layer):
     """Generalized implementation of Mobile Net V2
 
     Args:
-        config     (tuple of two int): number of filters, stride, expansion for and inverted res block
+        config       (list of tuples): number of filters, stride, expansion for inverted res block or 'default'
         alpha                 (float): controls the width of the network
             - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
             - If `alpha` > 1.0, proportionally increases the number of filters in each layer
@@ -2433,7 +2447,7 @@ class MobileNetV2(layers.Layer):
                 (320, 1, 6),
             ]
 
-    def make_divisible(self, v, divisor, min_value=None):
+    def _make_divisible(self, v, divisor, min_value=None):
         if min_value is None:
             min_value = divisor
         new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
@@ -2444,7 +2458,7 @@ class MobileNetV2(layers.Layer):
 
     def __call__(self, inputs):
         x = inputs
-        first_block_filters = self.make_divisible(32 * self.alpha, 8)
+        first_block_filters = self._make_divisible(32 * self.alpha, 8)
         x = layers.Conv2D(
             first_block_filters,
             kernel_size=3,
@@ -2468,11 +2482,174 @@ class MobileNetV2(layers.Layer):
             )(x)
 
         if self.alpha > 1.0:
-            last_block_filters = self.make_divisible(1280 * self.alpha, 8)
+            last_block_filters = self._make_divisible(1280 * self.alpha, 8)
         else:
             last_block_filters = 1280
 
         x = layers.Conv2D(last_block_filters, kernel_size=1, use_bias=self.use_bias)(x)
         x = layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon)(x)
         x = layers.Activation(self.activation)(x)
+        return x
+
+
+class MobileNetV3(layers.Layer):
+    """Generalized implementation of Mobile Net V2
+
+    Args:
+        config       (list of tuples): number of filters, depth, expansion, stride, se_ratio, activation for inverted res blocks or 'large', 'small'
+        last_point_ch           (int): number of output channels
+        minimalistic           (bool): use minimalistic model, these models have the same
+                    per-layer dimensions characteristic as MobilenetV3 however, they don't
+                    utilize any of the advanced blocks (squeeze-and-excite units, hard-swish,
+                    and 5x5 convolutions)
+        alpha                 (float): controls the width of the network
+            - If `alpha` < 1.0, proportionally decreases the number of filters in each layer
+            - If `alpha` > 1.0, proportionally increases the number of filters in each layer
+            - If `alpha` = 1, default number of filters from the paper are used at each layer
+        use_bias               (bool): whether the convolution layers use a bias vector, defalut: False
+        momentum              (float): momentum for the moving average in batch normalization, default: 0.999
+        epsilon:              (float): Small float added to variance to avoid dividing by zero in
+                    batch normalisation, default: 1e-3
+    """
+
+    def __init__(
+        self,
+        config,
+        last_point_ch=None,
+        minimalistic=False,
+        alpha=1,
+        use_bias=False,
+        momentum=0.999,
+        epsilon=1e-3,
+    ):
+        super().__init__()
+        self.config = config
+        self.last_point_ch = last_point_ch
+        self.minimalistic = minimalistic
+        self.alpha = alpha
+        self.use_bias = use_bias
+        self.momentum = momentum
+        self.epsilon = epsilon
+
+        if minimalistic:
+            kernel = 3
+            self.activation = relu
+            se_ratio = None
+        else:
+            kernel = 5
+            self.activation = hard_swish
+            se_ratio = 0.25
+
+        if config == "small":
+            self.last_point_ch = 1024
+            self.config = [
+                (1, self._depth(16) * self.alpha, 3, 2, se_ratio, relu),
+                (72.0 / 16, self._depth(24) * self.alpha, 3, 2, None, relu),
+                (88.0 / 24, self._depth(24) * self.alpha, 3, 1, None, relu),
+                (4, self._depth(40) * self.alpha, kernel, 2, se_ratio, self.activation),
+                (6, self._depth(40) * self.alpha, kernel, 1, se_ratio, self.activation),
+                (6, self._depth(40) * self.alpha, kernel, 1, se_ratio, self.activation),
+                (3, self._depth(48) * self.alpha, kernel, 1, se_ratio, self.activation),
+                (3, self._depth(48) * self.alpha, kernel, 1, se_ratio, self.activation),
+                (6, self._depth(96) * self.alpha, kernel, 2, se_ratio, self.activation),
+                (6, self._depth(96) * self.alpha, kernel, 1, se_ratio, self.activation),
+                (6, self._depth(96) * self.alpha, kernel, 1, se_ratio, self.activation),
+            ]
+        if config == "large":
+            self.last_point_ch = 1280
+            self.config = [
+                (1, self._depth(16) * self.alpha, 3, 1, None, relu),
+                (4, self._depth(24) * self.alpha, 3, 2, None, relu),
+                (3, self._depth(24) * self.alpha, 3, 1, None, relu),
+                (3, self._depth(40) * self.alpha, kernel, 2, se_ratio, relu),
+                (3, self._depth(40) * self.alpha, kernel, 1, se_ratio, relu),
+                (3, self._depth(40) * self.alpha, kernel, 1, se_ratio, relu),
+                (6, self._depth(80) * self.alpha, 3, 2, None, self.activation),
+                (2.5, self._depth(80) * self.alpha, 3, 1, None, self.activation),
+                (2.3, self._depth(80) * self.alpha, 3, 1, None, self.activation),
+                (2.3, self._depth(80) * self.alpha, 3, 1, None, self.activation),
+                (6, self._depth(112) * self.alpha, 3, 1, se_ratio, self.activation),
+                (6, self._depth(112) * self.alpha, 3, 1, se_ratio, self.activation),
+                (
+                    6,
+                    self._depth(160) * self.alpha,
+                    kernel,
+                    2,
+                    se_ratio,
+                    self.activation,
+                ),
+                (
+                    6,
+                    self._depth(160) * self.alpha,
+                    kernel,
+                    1,
+                    se_ratio,
+                    self.activation,
+                ),
+                (
+                    6,
+                    self._depth(160) * self.alpha,
+                    kernel,
+                    1,
+                    se_ratio,
+                    self.activation,
+                ),
+            ]
+
+    def _depth(self, v, divisor=8, min_value=None):
+        if min_value is None:
+            min_value = divisor
+        new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+        # Make sure that round down does not go down by more than 10%.
+        if new_v < 0.9 * v:
+            new_v += divisor
+        return new_v
+
+    def __call__(self, inputs):
+        x = inputs
+        x = layers.Conv2D(
+            16,
+            kernel_size=3,
+            strides=(2, 2),
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon, momentum=self.momentum)(x)
+        x = self.activation(x)
+
+        for filter, alpha, expansion, stride, se_ratio, activation in self.config:
+            x = InvertedResBlock(
+                filters=filter,
+                alpha=alpha,
+                expansion=expansion,
+                stride=stride,
+                activation=activation,
+                use_bias=self.use_bias,
+                momentum=self.momentum,
+                epsilon=self.epsilon,
+                se_ratio=se_ratio,
+            )(x)
+
+        last_conv_ch = self._depth(x.shape[-1] * 6)
+
+        # if the width multiplier is greater than 1 we
+        # increase the number of output channels
+        if self.alpha > 1.0:
+            self.last_point_ch = self._depth(self.last_point_ch * self.alpha)
+        x = layers.Conv2D(
+            last_conv_ch,
+            kernel_size=1,
+            padding="same",
+            use_bias=self.use_bias,
+        )(x)
+        x = layers.BatchNormalization(epsilon=self.epsilon, momentum=self.momentum)(x)
+        x = self.activation(x)
+        x = layers.Conv2D(
+            self.last_point_ch,
+            kernel_size=1,
+            padding="same",
+            use_bias=True,
+        )(x)
+        x = self.activation(x)
+
         return x
