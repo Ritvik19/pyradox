@@ -1,5 +1,5 @@
 # pyradox
-A Deep Learning library built on top of Keras consisting implementations of Artificial Neural Network Architectures
+A Deep Learning library built on top of TensorFlow(Keras) consisting implementations of Artificial Neural Network Architectures
 
 These implementations neither have a start nor an end just an interesting middle
 ___
@@ -74,7 +74,7 @@ ___
    35. [NASNetLarge](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/NASNetLarge.ipynb) Customized Implementation of NASNet Large
    36. [MobileNet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNet-1.ipynb) Generalized implementation of Mobile Net, check [Customised Usage Example](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNet-2.ipynb)
    37. [MobileNetV2](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV2-1.ipynb) Generalized implementation of Mobile Net, check [Customised Usage Example](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV2-2.ipynb)
-   38. [MobileNetV3](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV3-1.ipynb) Generalized implementation of Mobile Net, check [Small](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV3-2.ipynb) [Large](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV3-3.ipynb)
+   38. [MobileNetV3](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV3-1.ipynb) Generalized implementation of Mobile Net, check [Small](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/MobileNetV3-2.ipynb)
 3. DenseNets
    1. [DenselyConnectedNetwork](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedNetwork.ipynb) Network of Densely Connected Layers followed by Batch Normalization (optional) and Dropout (optional)
    2. [DenselyConnectedResnet](https://github.com/Ritvik19/pyradox-tutorials/blob/main/tutorials/DenselyConnectedResnet) Network of skip connections for densely connected layer
