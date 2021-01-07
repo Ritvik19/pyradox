@@ -1,5 +1,5 @@
 import math, copy
-from keras import layers
+from tensorflow.keras import layers
 from pyradox.modules import *
 from tensorflow.keras.activations import swish, relu
 
@@ -2617,9 +2617,9 @@ class MobileNetV3(layers.Layer):
         x = layers.BatchNormalization(epsilon=self.epsilon, momentum=self.momentum)(x)
         x = self.activation(x)
 
-        for filter, alpha, expansion, stride, se_ratio, activation in self.config:
+        for filter_, alpha, expansion, stride, se_ratio, activation in self.config:
             x = InvertedResBlock(
-                filters=filter,
+                filters=filter_,
                 alpha=alpha,
                 expansion=expansion,
                 stride=stride,
