@@ -1,7 +1,5 @@
 # pyradox
-A Deep Learning library built on top of TensorFlow(Keras) consisting implementations of Artificial Neural Network Architectures
-
-These implementations neither have a start nor an end just an interesting middle
+This python library helps you with implementing various state of the art neural networks in a totally customizable fashion using Tensorflow 2
 ___
 ## Installation
 
