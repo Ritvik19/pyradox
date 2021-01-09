@@ -1,5 +1,6 @@
 from tensorflow.keras import layers
-from tensorflow.keras.activations import swish, relu
+from tensorflow.keras.activations import swish
+from tensorflow.nn import relu6
 
 
 def relu(x):
@@ -1354,7 +1355,7 @@ class MobileNetConvBlock(layers.Layer):
         alpha,
         kernel=(3, 3),
         strides=(1, 1),
-        activation=lambda x: relu(x, max_value=6),
+        activation=relu6,
         use_bias=False,
     ):
         super().__init__()
@@ -1403,7 +1404,7 @@ class MobileNetDepthWiseConvBlock(layers.Layer):
         alpha,
         depth_multiplier=1,
         strides=(1, 1),
-        activation=lambda x: relu(x, max_value=6),
+        activation=relu6,
         use_bias=False,
     ):
         super().__init__()
@@ -1468,7 +1469,7 @@ class InvertedResBlock(layers.Layer):
         alpha,
         expansion,
         stride=(1, 1),
-        activation=lambda x: relu(x, max_value=6),
+        activation=relu6,
         use_bias=False,
         momentum=0.999,
         epsilon=1e-3,

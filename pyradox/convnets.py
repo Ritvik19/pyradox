@@ -1,7 +1,8 @@
 import math, copy
 from tensorflow.keras import layers
 from pyradox.modules import *
-from tensorflow.keras.activations import swish, relu
+from tensorflow.keras.activations import swish
+from tensorflow.nn import relu6
 
 
 def relu(x):
@@ -2344,7 +2345,7 @@ class MobileNet(layers.Layer):
         config="default",
         alpha=1.0,
         depth_multiplier=1,
-        activation=lambda x: relu(x, max_value=6),
+        activation=relu6,
         use_bias=False,
     ):
         super().__init__()
@@ -2414,7 +2415,7 @@ class MobileNetV2(layers.Layer):
         self,
         config="default",
         alpha=1,
-        activation=lambda x: relu(x, max_value=6),
+        activation=relu6,
         use_bias=False,
         momentum=0.999,
         epsilon=1e-3,
