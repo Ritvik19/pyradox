@@ -1,9 +1,19 @@
 # pyradox
 This python library helps you with implementing various state of the art neural networks in a totally customizable fashion using Tensorflow 2
+
+[![Downloads](https://pepy.tech/badge/pyradox)](https://pepy.tech/project/pyradox)
+[![Downloads](https://pepy.tech/badge/pyradox/month)](https://pepy.tech/project/pyradox)
+[![Downloads](https://pepy.tech/badge/pyradox/week)](https://pepy.tech/project/pyradox)
 ___
 ## Installation
 
+    pip install pyradox
+
+or    
+
     pip install git+https://github.com/Ritvik19/pyradox.git
+
+
 ___
 
 ## Usage
