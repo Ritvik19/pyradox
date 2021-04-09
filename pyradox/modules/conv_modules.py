@@ -52,33 +52,6 @@ class Convolution2D(layers.Layer):
         return x
 
 
-class DenselyConnected(layers.Layer):
-    """Densely Connected Layer followed by Batch Normalization (optional) and Dropout (optional)
-
-    Args:
-        units                (int): dimensionality of the output space
-        batch_normalization (bool): whether to use Batch Normalization, default: False
-        dropout            (float): the dropout rate, default: 0
-        kwargs (keyword arguments): the arguments for Dense Layer
-    """
-
-    def __init__(self, units, batch_normalization=False, dropout=0, **kwargs):
-        super().__init__()
-        self.units = units
-        self.batch_normalization = batch_normalization
-        self.dropout = dropout
-        self.kwargs = kwargs
-
-    def __call__(self, inputs):
-        x = inputs
-        x = layers.Dense(self.units, **self.kwargs)(x)
-        if self.batch_normalization:
-            x = layers.BatchNormalization()(x)
-        if self.dropout != 0:
-            x = layers.Dropout(self.dropout)(x)
-        return x
-
-
 class DenseNetConvolutionBlock(layers.Layer):
     """A Convolution block for DenseNets
 
@@ -141,45 +114,6 @@ class DenseNetTransitionBlock(layers.Layer):
         x = layers.Activation(self.activation)(x)
         x = layers.Conv2D(int(x.shape[-1] * self.reduction), 1, **self.kwargs)(x)
         x = layers.AveragePooling2D(2, strides=2)(x)
-        return x
-
-
-class DenseSkipConnection(layers.Layer):
-    """Implementation of a skip connection for densely connected layer
-
-    Args:
-        units                   (int): dimensionality of the output space
-        batch_normalization    (bool): whether to use Batch Normalization, default: False
-        dropout               (float): the dropout rate, default: 0
-        activation (keras Activation): activation to be applied, default: relu
-        kwargs    (keyword arguments): the arguments for Dense Layer
-    """
-
-    def __init__(
-        self, units, batch_normalization=False, dropout=0, activation="relu", **kwargs
-    ):
-        super().__init__()
-        self.units = units
-        self.batch_normalization = batch_normalization
-        self.dropout = dropout
-        self.activation = activation
-        self.kwargs = kwargs
-
-    def __call__(self, inputs):
-        x = inputs
-        x = layers.Dense(self.units, **self.kwargs)(x)
-        x1 = layers.Activation(self.activation)(x)
-        if self.batch_normalization:
-            x1 = layers.BatchNormalization()(x1)
-        if self.dropout > 0:
-            x1 = layers.Dropout(self.dropout)(x1)
-        x1 = layers.Dense(self.units, **self.kwargs)(x1)
-        x = layers.add([x, x1])
-        x = layers.Activation(self.activation)(x)
-        if self.batch_normalization:
-            x = layers.BatchNormalization()(x)
-        if self.dropout > 0:
-            x = layers.Dropout(self.dropout)(x)
         return x
 
 
@@ -780,24 +714,6 @@ class ConvSkipConnection(layers.Layer):
         if self.dropout > 0:
             x = layers.Dropout(self.dropout)(x)
         return x
-
-
-class Rescale(layers.Layer):
-    """A layer that rescales the input
-    x_out = (x_in -mu) / sigma
-
-    Args:
-        mu    (float): poplation mean, default: 0
-        sigma (float): population standard deviation, default: 255
-    """
-
-    def __init__(self, mu=0.0, sigma=255.0):
-        super().__init__()
-        self.mu = mu
-        self.sigma = sigma
-
-    def __call__(self, inputs):
-        return (inputs - self.mu) / self.sigma
 
 
 class InceptionResNetConv2D(layers.Layer):
