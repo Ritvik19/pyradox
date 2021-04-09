@@ -91,7 +91,8 @@ NAS Net Large | Customized Implementation of NAS Net Large | 4D tensor with shap
 MobileNet | Customized Implementation of MobileNet | 4D tensor with shape (batch_shape, rows, cols, channels) | 4D tensor with shape (batch_shape, new_rows, new_cols, new_channels) | [usage 1](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNet/MobileNet-1.md) [usage 2](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNet/MobileNet-2.md)
 Mobile Net V2 | Customized Implementation of Mobile Net V2 | 4D tensor with shape (batch_shape, rows, cols, channels) | 4D tensor with shape (batch_shape, new_rows, new_cols, new_channels) | [usage 1](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNetV2/MobileNetV2-1.md) [usage 2](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNetV2/MobileNetV2-2.md)
 Mobile Net V3 | Customized Implementation of Mobile Net V3 | 4D tensor with shape (batch_shape, rows, cols, channels) | 4D tensor with shape (batch_shape, new_rows, new_cols, new_channels) | [usage 1](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNetV3/MobileNetV3-1.md) [usage 2](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/MobileNetV3/MobileNetV3-2.md)
-
+Seg Net | Generalised Implementation of SegNet for Image Segmentation Applications | 4D tensor with shape (batch_shape, rows, cols, channels) | 4D tensor with shape (batch_shape, rows, cols, channels) | [check here](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/SegNet/SegNet.md)
+U Net | Generalised Implementation of UNet for Image Segmentation Applications | 4D tensor with shape (batch_shape, rows, cols, channels) | 4D tensor with shape (batch_shape, rows, cols, channels) | [check here](https://github.com/Ritvik19/pyradox-doc/blob/main/usage/UNet/UNet.md)
 ### DenseNets
 
 Module | Description | Input Shape | Output Shape | Usage

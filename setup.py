@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyradox",
-    version="0.17.10",
+    version="0.18.10",
     author="Ritvik Rastogi",
     author_email="rastogiritvik99@gmail.com",
     description="State of the Art Neural Networks for Deep Learning",
