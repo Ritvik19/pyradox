@@ -161,11 +161,16 @@ class GeneralizedUNet(layers.Layer):
         return x
 
     def _pooling_factor(self):
-        return (
-            reduce(lambda a, b: a[3] * b[3], self.encoder_config)
-            if len(self.encoder_config) > 1
-            else self.encoder_config[0][3]
-        )
+        if len(self.encoder_config) == 0:
+            return self.encoder_config[0][3]
+        else:
+            it = iter(self.encoder_config)
+            value = next(it)[3]
+
+            for element in it:
+                value = value * element[3]
+
+            return value
 
     def __call__(self, inputs):
         if (
